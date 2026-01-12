@@ -14,17 +14,25 @@ async def test_project_client_default_base_url(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_project_client_init_headers(monkeypatch):
-    """Test that ProjectClient initializes with correct headers from settings."""
+async def test_project_client_auth_injection(respx_mock, monkeypatch):
+    """Test that ProjectClient injects auth headers via Auth flow."""
     # Patch settings
-    monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_TOKEN", "mock_plugin_token")
-    monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_KEY", "mock_user_key")
+    monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_TOKEN", "mock_token")
+    monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_KEY", "mock_user")
 
-    client = ProjectClient()
+    client = ProjectClient(base_url="https://mock.api")
 
-    assert client.headers["X-PLUGIN-TOKEN"] == "mock_plugin_token"
-    assert client.headers["X-USER-KEY"] == "mock_user_key"
-    assert client.headers["Content-Type"] == "application/json"
+    # Mock endpoint
+    route = respx_mock.get("https://mock.api/test").mock(
+        return_value=Response(200, json={})
+    )
+
+    await client.get("/test")
+
+    assert route.called
+    headers = route.calls.last.request.headers
+    assert headers["X-PLUGIN-TOKEN"] == "mock_token"
+    assert headers["X-USER-KEY"] == "mock_user"
 
 
 @pytest.mark.asyncio

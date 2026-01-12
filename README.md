@@ -1,5 +1,7 @@
 # Feishu Agent (MCP Server)
 
+[![CI](https://github.com/Wulnut/feishu_agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Wulnut/feishu_agent/actions/workflows/ci.yml)
+
 这是一个基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 构建的飞书 (Lark/Feishu) 智能代理服务。它允许 LLM (如 Claude, Cursor) 通过标准协议直接调用飞书项目 (Feishu Project) 和飞书开放平台的能力。
 
 ## ✨ 功能特性

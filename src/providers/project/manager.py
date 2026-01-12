@@ -43,9 +43,10 @@ class ProjectManager:
             for pair in item.field_value_pairs:
                 key = pair.get("field_key")
                 val = pair.get("field_value")
-                if key:
+                if key is not None:
                     human_key = mappings.get(key, key)
-                    task_data[human_key] = val
+                    if human_key is not None:
+                        task_data[human_key] = val
 
             tasks.append(task_data)
 
