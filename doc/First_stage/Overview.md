@@ -72,7 +72,7 @@ lark_mcp_stage1/
 ```python
 from typing import List, Dict
 import httpx
-from src.core.client import get_project_client
+from src.core.project_client import get_project_client
 
 class ProjectItemProvider:
     def __init__(self, project_key: str):
