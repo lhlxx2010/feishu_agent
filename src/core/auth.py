@@ -1,7 +1,17 @@
+"""
+Author: liangyz liangyz@seirobotics.net
+Date: 2026-01-12 17:56:08
+LastEditors: liangyz liangyz@seirobotics.net
+LastEditTime: 2026-01-12 18:59:27
+FilePath: /feishu_agent/src/core/auth.py
+"""
+
 import logging
 import time
-import httpx
 from typing import Optional
+
+import httpx
+
 from src.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -49,16 +59,30 @@ class AuthManager:
                 resp.raise_for_status()
                 data = resp.json()
 
-                if data.get("code") != 0:
+                # 调试：打印实际响应内容
+                logger.debug(f"Plugin token API response: {data}")
+
+                # 检查响应格式：可能是 {"code": 0, "data": {...}} 或直接返回 token
+                code = data.get("code")
+                if code is not None and code != 0:
                     logger.error(
-                        f"Auth failed: {data.get('msg')} (code {data.get('code')})"
+                        f"Auth failed: {data.get('msg', 'Unknown error')} (code {code})"
                     )
+                    logger.error(f"Full response data: {data}")
                     return None
 
                 # The response structure based on common Lark patterns:
                 # { "code": 0, "data": { "plugin_token": "...", "expire": 7200 } }
-                auth_data = data.get("data", {})
+                # 或者直接返回: { "plugin_token": "...", "expire": 7200 }
+                auth_data = data.get("data", data)
                 self._plugin_token = auth_data.get("plugin_token")
+
+                if not self._plugin_token:
+                    logger.error(
+                        f"Plugin token not found in response. Response structure: {data}"
+                    )
+                    return None
+
                 # Buffer of 60 seconds
                 expires_in = auth_data.get("expire", 7200)
                 self._expiry_time = time.time() + expires_in - 60

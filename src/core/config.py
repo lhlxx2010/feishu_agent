@@ -1,3 +1,4 @@
+import logging
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,9 +19,23 @@ class Settings(BaseSettings):
     FEISHU_PROJECT_PLUGIN_ID: str | None = None
     FEISHU_PROJECT_PLUGIN_SECRET: str | None = None
 
+    # Logging
+    LOG_LEVEL: str = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
+    def get_log_level(self) -> int:
+        """Convert string log level to logging constant."""
+        level_map = {
+            "DEBUG": logging.DEBUG,
+            "INFO": logging.INFO,
+            "WARNING": logging.WARNING,
+            "ERROR": logging.ERROR,
+            "CRITICAL": logging.CRITICAL,
+        }
+        return level_map.get(self.LOG_LEVEL.upper(), logging.INFO)
 
 
 settings = Settings()

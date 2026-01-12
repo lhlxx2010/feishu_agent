@@ -1,10 +1,11 @@
 from src.mcp_server import mcp
+from src.core.config import settings
 import logging
 import sys
 
 # Configure logging to write to a file in log directory
 logging.basicConfig(
-    level=logging.INFO,
+    level=settings.get_log_level(),
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     filename="log/agent.log",
     filemode="a",
