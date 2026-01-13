@@ -46,6 +46,28 @@ class WorkItemProvider(Provider):
         project_key = await self._get_project_key()
         return await self.meta.get_type_key(project_key, self.work_item_type_name)
 
+    async def _field_exists(
+        self, project_key: str, type_key: str, field_name: str
+    ) -> bool:
+        """
+        检查字段是否存在（不抛异常）
+
+        Args:
+            project_key: 项目空间 Key
+            type_key: 工作项类型 Key
+            field_name: 字段名称
+
+        Returns:
+            True: 字段存在
+            False: 字段不存在
+        """
+        try:
+            await self.meta.get_field_key(project_key, type_key, field_name)
+            return True
+        except Exception as e:
+            logger.debug(f"Field '{field_name}' not found: {e}")
+            return False
+
     async def _resolve_field_value(
         self, project_key: str, type_key: str, field_key: str, value: Any
     ) -> Any:
@@ -243,47 +265,57 @@ class WorkItemProvider(Provider):
 
         # 处理状态过滤
         if status:
-            field_key = await self.meta.get_field_key(project_key, type_key, "status")
-            resolved_values = []
-            for s in status:
-                try:
-                    val = await self._resolve_field_value(
-                        project_key, type_key, field_key, s
-                    )
-                    resolved_values.append(val)
-                except Exception as e:
-                    logger.warning(f"Failed to resolve status '{s}': {e}")
-                    resolved_values.append(s)
+            if await self._field_exists(project_key, type_key, "status"):
+                field_key = await self.meta.get_field_key(
+                    project_key, type_key, "status"
+                )
+                resolved_values = []
+                for s in status:
+                    try:
+                        val = await self._resolve_field_value(
+                            project_key, type_key, field_key, s
+                        )
+                        resolved_values.append(val)
+                    except Exception as e:
+                        logger.warning(f"Failed to resolve status '{s}': {e}")
+                        resolved_values.append(s)
 
-            conditions.append(
-                {
-                    "field_key": field_key,
-                    "operator": "IN",
-                    "value": resolved_values,
-                }
-            )
+                conditions.append(
+                    {
+                        "field_key": field_key,
+                        "operator": "IN",
+                        "value": resolved_values,
+                    }
+                )
+            else:
+                logger.warning(f"Field 'status' not found, skipping filter")
 
         # 处理优先级过滤
         if priority:
-            field_key = await self.meta.get_field_key(project_key, type_key, "priority")
-            resolved_values = []
-            for p in priority:
-                try:
-                    val = await self._resolve_field_value(
-                        project_key, type_key, field_key, p
-                    )
-                    resolved_values.append(val)
-                except Exception as e:
-                    logger.warning(f"Failed to resolve priority '{p}': {e}")
-                    resolved_values.append(p)
+            if await self._field_exists(project_key, type_key, "priority"):
+                field_key = await self.meta.get_field_key(
+                    project_key, type_key, "priority"
+                )
+                resolved_values = []
+                for p in priority:
+                    try:
+                        val = await self._resolve_field_value(
+                            project_key, type_key, field_key, p
+                        )
+                        resolved_values.append(val)
+                    except Exception as e:
+                        logger.warning(f"Failed to resolve priority '{p}': {e}")
+                        resolved_values.append(p)
 
-            conditions.append(
-                {
-                    "field_key": field_key,
-                    "operator": "IN",
-                    "value": resolved_values,
-                }
-            )
+                conditions.append(
+                    {
+                        "field_key": field_key,
+                        "operator": "IN",
+                        "value": resolved_values,
+                    }
+                )
+            else:
+                logger.warning(f"Field 'priority' not found, skipping filter")
 
         # 处理负责人过滤
         if owner:
@@ -297,7 +329,7 @@ class WorkItemProvider(Provider):
                     }
                 )
             except Exception as e:
-                logger.warning(f"Failed to resolve owner '{owner}': {e}")
+                logger.warning(f"Failed to resolve owner '{owner}': {e}, skipping owner filter")
 
         # 构建 search_group
         search_group = {"conjunction": "AND", "conditions": conditions}
@@ -314,8 +346,14 @@ class WorkItemProvider(Provider):
         )
 
         # 标准化返回结果
-        items = result.get("work_items", [])
-        pagination = result.get("pagination", {})
+        # 处理 API 可能返回列表或字典的情况
+        if isinstance(result, list):
+            items = result
+            pagination = {"total": len(result), "page_num": page_num, "page_size": page_size}
+            logger.debug("API returned list format, converted to standard format")
+        else:
+            items = result.get("work_items", [])
+            pagination = result.get("pagination", {})
 
         return {
             "items": items,
@@ -324,25 +362,161 @@ class WorkItemProvider(Provider):
             "page_size": pagination.get("page_size", page_size),
         }
 
-    async def get_active_issues(self, page_size: int = 50) -> List[Dict]:
+    async def get_tasks(
+        self,
+        status: Optional[List[str]] = None,
+        priority: Optional[List[str]] = None,
+        owner: Optional[str] = None,
+        page_num: int = 1,
+        page_size: int = 50,
+    ) -> Dict[str, Any]:
         """
-        获取活跃的 Issues（未完成状态）
+        获取工作项列表（支持全量或按条件过滤）
 
-        这是 filter_issues 的便捷封装，适用于快速获取进行中的任务。
+        设计理念:
+        - 无参数时返回全部工作项
+        - 字段不存在时自动跳过该过滤条件
+        - 支持多维度组合过滤
 
         Args:
+            status: 状态列表（可选，如 ["待处理", "进行中"]）
+            priority: 优先级列表（可选，如 ["P0", "P1"]）
+            owner: 负责人（可选，姓名或邮箱）
+            page_num: 页码（从 1 开始）
             page_size: 每页数量
 
         Returns:
-            工作项列表
+            {
+                "items": [...],
+                "total": 100,
+                "page_num": 1,
+                "page_size": 50
+            }
+
+        示例:
+            # 获取全部工作项
+            result = await provider.get_tasks()
+
+            # 按优先级过滤
+            result = await provider.get_tasks(priority=["P0", "P1"])
         """
-        # 获取非已完成状态的 Issues
-        # 注意：具体的状态名称需要根据实际项目配置调整
-        result = await self.filter_issues(
-            status=["待处理", "进行中", "待验证"],
+        project_key = await self._get_project_key()
+        type_key = await self._get_type_key()
+
+        # 构建搜索条件
+        conditions = []
+
+        # 处理状态过滤
+        if status:
+            if await self._field_exists(project_key, type_key, "status"):
+                field_key = await self.meta.get_field_key(
+                    project_key, type_key, "status"
+                )
+                resolved_values = []
+                for s in status:
+                    try:
+                        val = await self._resolve_field_value(
+                            project_key, type_key, field_key, s
+                        )
+                        resolved_values.append(val)
+                    except Exception as e:
+                        logger.warning(f"Failed to resolve status '{s}': {e}")
+                        resolved_values.append(s)
+
+                conditions.append(
+                    {
+                        "field_key": field_key,
+                        "operator": "IN",
+                        "value": resolved_values,
+                    }
+                )
+                logger.info(f"Added status filter: {status}")
+            else:
+                logger.warning(
+                    f"Field 'status' not found in project, skipping status filter"
+                )
+
+        # 处理优先级过滤
+        if priority:
+            if await self._field_exists(project_key, type_key, "priority"):
+                field_key = await self.meta.get_field_key(
+                    project_key, type_key, "priority"
+                )
+                resolved_values = []
+                for p in priority:
+                    try:
+                        val = await self._resolve_field_value(
+                            project_key, type_key, field_key, p
+                        )
+                        resolved_values.append(val)
+                    except Exception as e:
+                        logger.warning(f"Failed to resolve priority '{p}': {e}")
+                        resolved_values.append(p)
+
+                conditions.append(
+                    {
+                        "field_key": field_key,
+                        "operator": "IN",
+                        "value": resolved_values,
+                    }
+                )
+                logger.info(f"Added priority filter: {priority}")
+            else:
+                logger.warning(
+                    f"Field 'priority' not found in project, skipping priority filter"
+                )
+
+        # 处理负责人过滤
+        if owner:
+            try:
+                user_key = await self.meta.get_user_key(owner)
+                conditions.append(
+                    {
+                        "field_key": "owner",
+                        "operator": "IN",
+                        "value": [user_key],
+                    }
+                )
+                logger.info(f"Added owner filter: {owner}")
+            except Exception as e:
+                logger.warning(
+                    f"Failed to resolve owner '{owner}': {e}, skipping owner filter"
+                )
+
+        # 构建 search_group
+        search_group = {"conjunction": "AND", "conditions": conditions}
+
+        logger.info(
+            f"Querying tasks with {len(conditions)} conditions, page_num={page_num}, page_size={page_size}"
+        )
+
+        # 调用 API
+        result = await self.api.search_params(
+            project_key=project_key,
+            work_item_type_key=type_key,
+            search_group=search_group,
+            page_num=page_num,
             page_size=page_size,
         )
-        return result.get("items", [])
+
+        # 标准化返回结果
+        # 处理 API 可能返回列表或字典的情况
+        if isinstance(result, list):
+            items = result
+            pagination = {"total": len(result), "page_num": page_num, "page_size": page_size}
+            logger.debug("API returned list format, converted to standard format")
+        else:
+            items = result.get("work_items", [])
+            pagination = result.get("pagination", {})
+
+        logger.info(f"Retrieved {len(items)} items (total: {pagination.get('total', 0)})")
+
+        return {
+            "items": items,
+            "total": pagination.get("total", len(items)),
+            "page_num": pagination.get("page_num", page_num),
+            "page_size": pagination.get("page_size", page_size),
+        }
 
     async def list_available_options(self, field_name: str) -> Dict[str, str]:
         """

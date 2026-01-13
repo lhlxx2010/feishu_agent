@@ -58,32 +58,39 @@ class TestMCPTools:
         assert "API Error" in result
 
     @pytest.mark.asyncio
-    async def test_get_active_tasks_success(self, mock_provider):
-        """测试获取活跃任务成功"""
-        from src.mcp_server import get_active_tasks
+    async def test_get_tasks_success(self, mock_provider):
+        """测试获取任务成功"""
+        from src.mcp_server import get_tasks
 
-        mock_provider.get_active_issues.return_value = [
-            {"id": 1, "name": "Task 1", "field_value_pairs": []},
-            {"id": 2, "name": "Task 2", "field_value_pairs": []},
-        ]
+        mock_provider.get_tasks.return_value = {
+            "items": [
+                {"id": 1, "name": "Task 1", "field_value_pairs": []},
+                {"id": 2, "name": "Task 2", "field_value_pairs": []},
+            ],
+            "total": 2,
+            "page_num": 1,
+            "page_size": 50,
+        }
 
-        result = await get_active_tasks(project="proj_xxx", page_size=20)
+        result = await get_tasks(project="proj_xxx", page_size=50)
 
         data = json.loads(result)
-        assert data["count"] == 2
+        assert data["total"] == 2
         assert len(data["items"]) == 2
-        mock_provider.get_active_issues.assert_awaited_once_with(page_size=20)
+        mock_provider.get_tasks.assert_awaited_once_with(
+            status=None, priority=None, owner=None, page_num=1, page_size=50
+        )
 
     @pytest.mark.asyncio
-    async def test_get_active_tasks_error(self, mock_provider):
-        """测试获取活跃任务失败"""
-        from src.mcp_server import get_active_tasks
+    async def test_get_tasks_error(self, mock_provider):
+        """测试获取任务失败"""
+        from src.mcp_server import get_tasks
 
-        mock_provider.get_active_issues.side_effect = Exception("Network Error")
+        mock_provider.get_tasks.side_effect = Exception("Network Error")
 
-        result = await get_active_tasks(project="proj_xxx")
+        result = await get_tasks(project="proj_xxx")
 
-        assert "获取失败" in result
+        assert "获取任务列表失败" in result
         assert "Network Error" in result
 
     @pytest.mark.asyncio

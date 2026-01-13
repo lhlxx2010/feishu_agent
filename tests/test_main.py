@@ -10,16 +10,16 @@ def test_mcp_tool_registration():
     tools = mcp._tool_manager.list_tools()
     tool_names = [t.name for t in tools]
 
-    assert "get_active_tasks" in tool_names
+    assert "get_tasks" in tool_names
     assert "create_task" in tool_names
 
 
-def test_get_active_tasks_metadata():
+def test_get_tasks_metadata():
     """Verify tool metadata (description, args)."""
     tools = mcp._tool_manager.list_tools()
-    tool = next(t for t in tools if t.name == "get_active_tasks")
+    tool = next(t for t in tools if t.name == "get_tasks")
 
-    assert "活跃" in tool.description or "active" in tool.description.lower()
+    assert "工作项" in tool.description or "task" in tool.description.lower()
     # tool.parameters is the JSON Schema dict
     assert "project" in tool.parameters["properties"]
     assert tool.parameters["required"] == ["project"]

@@ -246,8 +246,8 @@ async def test_filter_issues_by_priority(mock_api, mock_metadata):
 
 
 @pytest.mark.asyncio
-async def test_get_active_issues(mock_api, mock_metadata):
-    """测试获取活跃 Issues"""
+async def test_get_tasks(mock_api, mock_metadata):
+    """测试获取工作项（支持全量和过滤）"""
     mock_metadata.get_project_key.return_value = "proj_123"
     mock_metadata.get_type_key.return_value = "type_issue"
     mock_metadata.get_field_key.side_effect = lambda pk, tk, name: f"field_{name}"
@@ -256,8 +256,8 @@ async def test_get_active_issues(mock_api, mock_metadata):
     mock_api.search_params = AsyncMock(
         return_value={
             "work_items": [
-                {"id": 1001, "name": "Active Issue 1"},
-                {"id": 1002, "name": "Active Issue 2"},
+                {"id": 1001, "name": "Task 1"},
+                {"id": 1002, "name": "Task 2"},
             ],
             "pagination": {"total": 2, "page_num": 1, "page_size": 50},
         }
@@ -265,12 +265,15 @@ async def test_get_active_issues(mock_api, mock_metadata):
 
     provider = WorkItemProvider("My Project")
 
-    # Execute
-    items = await provider.get_active_issues(page_size=50)
+    # Execute - 获取全部任务
+    result = await provider.get_tasks(page_size=50)
 
     # Verify
-    assert len(items) == 2
-    assert items[0]["id"] == 1001
+    assert result["total"] == 2
+    assert result["page_num"] == 1
+    assert result["page_size"] == 50
+    assert len(result["items"]) == 2
+    assert result["items"][0]["id"] == 1001
 
     # 检查调用了 search_params
     mock_api.search_params.assert_awaited_once()

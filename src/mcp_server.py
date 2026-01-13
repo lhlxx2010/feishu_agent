@@ -6,7 +6,7 @@ MCP Server - 飞书 Agent 工具接口
 工具列表:
 - list_projects: 列出所有可用项目
 - create_task: 创建工作项
-- get_active_tasks: 获取活跃的工作项
+- get_tasks: 获取工作项列表（支持全量或过滤）
 - filter_tasks: 高级过滤查询
 - update_task: 更新工作项
 - get_task_options: 获取字段可用选项
@@ -197,45 +197,87 @@ async def create_task(
 
 
 @mcp.tool()
-async def get_active_tasks(project: str, page_size: int = 20) -> str:
+async def get_tasks(
+    project: str,
+    status: Optional[str] = None,
+    priority: Optional[str] = None,
+    owner: Optional[str] = None,
+    page_num: int = 1,
+    page_size: int = 50,
+) -> str:
     """
-    获取项目中活跃的工作项（未完成状态）。
+    获取项目中的工作项列表（支持全量获取或按条件过滤）。
 
-    返回待处理、进行中、待验证状态的工作项列表。
-    这是快速了解项目当前进展的便捷工具。
+    这是通用的任务获取工具，具备以下特性：
+    1. 无过滤参数时，返回项目的全部工作项
+    2. 支持按状态、优先级、负责人进行灵活过滤
+    3. 如果项目不存在某个字段（如状态），会自动跳过该过滤条件
 
     Args:
         project: 项目标识符。可以是:
-                - 项目名称（如 "SR6D2VA-7552-Lark"）
+                - 项目名称（如 "Project Management"）
                 - project_key（如 "project_xxx"）
-        page_size: 返回的最大数量，默认 20，最大 100。
+        status: 状态过滤（多个用逗号分隔），如 "待处理,进行中"（可选）。
+        priority: 优先级过滤（多个用逗号分隔），如 "P0,P1"（可选）。
+        owner: 负责人过滤（姓名或邮箱）（可选）。
+        page_num: 页码，从 1 开始（默认 1）。
+        page_size: 每页数量（默认 50，最大 100）。
 
     Returns:
         JSON 格式的工作项列表，包含 id, name, status, priority, owner。
         失败时返回错误信息。
 
     Examples:
-        # 使用项目名称查询
-        get_active_tasks(project="SR6D2VA-7552-Lark")
+        # 获取项目的全部工作项
+        get_tasks(project="Project Management")
 
-        # 使用 project_key 查询
-        get_active_tasks(project="project_xxx")
+        # 获取指定优先级的任务
+        get_tasks(project="Project Management", priority="P0,P1")
+
+        # 组合多个条件过滤
+        get_tasks(
+            project="Project Management",
+            status="进行中",
+            priority="P0",
+            owner="张三"
+        )
     """
     try:
         provider = _create_provider(project)
-        items = await provider.get_active_issues(page_size=min(page_size, 100))
+
+        # 解析逗号分隔的过滤条件
+        status_list = [s.strip() for s in status.split(",")] if status else None
+        priority_list = [p.strip() for p in priority.split(",")] if priority else None
+
+        result = await provider.get_tasks(
+            status=status_list,
+            priority=priority_list,
+            owner=owner,
+            page_num=page_num,
+            page_size=min(page_size, 100),
+        )
+
+        # 确保 result 是字典类型
+        if not isinstance(result, dict):
+            logger.error(f"Unexpected result type: {type(result)}, value: {result}")
+            return f"获取任务列表失败: 返回数据格式错误"
 
         # 简化返回结果
-        simplified = [_simplify_work_item(item) for item in items]
+        simplified = [_simplify_work_item(item) for item in result.get("items", [])]
 
         return json.dumps(
-            {"count": len(simplified), "items": simplified},
+            {
+                "total": result.get("total", 0),
+                "page_num": result.get("page_num", page_num),
+                "page_size": result.get("page_size", page_size),
+                "items": simplified,
+            },
             ensure_ascii=False,
             indent=2,
         )
     except Exception as e:
-        logger.exception(f"Failed to get active tasks: {e}")
-        return f"获取失败: {str(e)}"
+        logger.exception(f"Failed to get tasks: {e}")
+        return f"获取任务列表失败: {str(e)}"
 
 
 @mcp.tool()
