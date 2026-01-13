@@ -1,4 +1,5 @@
-from typing import List, Dict, Optional, Any
+from typing import Dict, List, Optional
+
 from src.core.project_client import get_project_client
 
 

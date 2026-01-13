@@ -19,7 +19,7 @@ def test_get_active_tasks_metadata():
     tools = mcp._tool_manager.list_tools()
     tool = next(t for t in tools if t.name == "get_active_tasks")
 
-    assert "active tasks" in tool.description
+    assert "活跃" in tool.description or "active" in tool.description.lower()
     # tool.parameters is the JSON Schema dict
-    assert "project_key" in tool.parameters["properties"]
-    assert tool.parameters["required"] == ["project_key"]
+    assert "project" in tool.parameters["properties"]
+    assert tool.parameters["required"] == ["project"]

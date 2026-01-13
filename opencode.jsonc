@@ -18,6 +18,18 @@
         "deepwiki-sse": {
             "type": "remote",
             "url": "https://mcp.deepwiki.com/mcp"
+        },
+        "lark": {
+            "type": "local",
+            "command": ["uv", "run", "/home/liangyz/mcp/feishu_agent/main.py"],
+            "enabled":true,
+            "environment": {
+                "FEISHU_PROJECT_USER_KEY": "7387857889332969475",
+                "FEISHU_PROJECT_BASE_URL": "https://project.feishu.cn",
+                "FEISHU_PROJECT_PLUGIN_ID": "MII_695B8D7B6DC0CBCD",
+                "FEISHU_PROJECT_PLUGIN_SECRET": "3DB2B96853C5B45F904CBDF4B798AE1B",
+                "LOG_LEVEL": "DEBUG"
+            }
         }
     },
     //permissions

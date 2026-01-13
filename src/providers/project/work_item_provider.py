@@ -1,8 +1,9 @@
-from typing import List, Dict, Optional, Any
+import logging
+from typing import Any, Dict, List, Optional
+
 from src.providers.base import Provider
 from src.providers.project.api.work_item import WorkItemAPI
 from src.providers.project.managers import MetadataManager
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,11 @@ class WorkItemProvider(Provider):
                 raise ValueError("Project key not resolved")
         return self._project_key
 
+    async def _get_type_key(self) -> str:
+        """获取工作项类型 Key"""
+        project_key = await self._get_project_key()
+        return await self.meta.get_type_key(project_key, self.work_item_type_name)
+
     async def _resolve_field_value(
         self, project_key: str, type_key: str, field_key: str, value: Any
     ) -> Any:
@@ -65,9 +71,18 @@ class WorkItemProvider(Provider):
     ) -> int:
         """
         创建 Issue
+
+        Args:
+            name: Issue 标题
+            priority: 优先级 (P0/P1/P2/P3)
+            description: 描述
+            assignee: 负责人（姓名或邮箱）
+
+        Returns:
+            创建的 Issue ID
         """
         project_key = await self._get_project_key()
-        type_key = await self.meta.get_type_key(project_key, self.work_item_type_name)
+        type_key = await self._get_type_key()
 
         logger.info(f"Creating Issue in Project: {project_key}, Type: {type_key}")
 
@@ -116,15 +131,232 @@ class WorkItemProvider(Provider):
     async def get_issue_details(self, issue_id: int) -> Dict:
         """获取 Issue 详情"""
         project_key = await self._get_project_key()
-        type_key = await self.meta.get_type_key(project_key, self.work_item_type_name)
+        type_key = await self._get_type_key()
 
         items = await self.api.query(project_key, type_key, [issue_id])
         if not items:
             raise Exception(f"Issue {issue_id} not found")
         return items[0]
 
+    async def update_issue(
+        self,
+        issue_id: int,
+        name: Optional[str] = None,
+        priority: Optional[str] = None,
+        description: Optional[str] = None,
+        status: Optional[str] = None,
+        assignee: Optional[str] = None,
+    ) -> None:
+        """
+        更新 Issue
+
+        Args:
+            issue_id: Issue ID
+            name: 标题（可选）
+            priority: 优先级（可选）
+            description: 描述（可选）
+            status: 状态（可选）
+            assignee: 负责人（可选）
+        """
+        project_key = await self._get_project_key()
+        type_key = await self._get_type_key()
+
+        update_fields = []
+
+        if name is not None:
+            update_fields.append({"field_key": "name", "field_value": name})
+
+        if description is not None:
+            field_key = await self.meta.get_field_key(
+                project_key, type_key, "description"
+            )
+            update_fields.append({"field_key": field_key, "field_value": description})
+
+        if priority is not None:
+            field_key = await self.meta.get_field_key(project_key, type_key, "priority")
+            option_val = await self._resolve_field_value(
+                project_key, type_key, field_key, priority
+            )
+            update_fields.append({"field_key": field_key, "field_value": option_val})
+
+        if status is not None:
+            field_key = await self.meta.get_field_key(project_key, type_key, "status")
+            option_val = await self._resolve_field_value(
+                project_key, type_key, field_key, status
+            )
+            update_fields.append({"field_key": field_key, "field_value": option_val})
+
+        if assignee is not None:
+            user_key = await self.meta.get_user_key(assignee)
+            update_fields.append({"field_key": "owner", "field_value": user_key})
+
+        if update_fields:
+            await self.api.update(project_key, type_key, issue_id, update_fields)
+            logger.info(f"Updated Issue {issue_id} with {len(update_fields)} fields")
+
     async def delete_issue(self, issue_id: int) -> None:
         """删除 Issue"""
         project_key = await self._get_project_key()
-        type_key = await self.meta.get_type_key(project_key, self.work_item_type_name)
+        type_key = await self._get_type_key()
         await self.api.delete(project_key, type_key, issue_id)
+
+    async def filter_issues(
+        self,
+        status: Optional[List[str]] = None,
+        priority: Optional[List[str]] = None,
+        owner: Optional[str] = None,
+        page_num: int = 1,
+        page_size: int = 20,
+    ) -> Dict[str, Any]:
+        """
+        过滤查询 Issues
+
+        支持按状态、优先级、负责人进行过滤，自动将人类可读的值转换为 API 所需的 Key。
+
+        Args:
+            status: 状态列表（如 ["待处理", "进行中"]）
+            priority: 优先级列表（如 ["P0", "P1"]）
+            owner: 负责人（姓名或邮箱）
+            page_num: 页码（从 1 开始）
+            page_size: 每页数量
+
+        Returns:
+            {
+                "items": [...],  # 工作项列表
+                "total": 100,    # 总数
+                "page_num": 1,
+                "page_size": 20
+            }
+
+        示例:
+            # 获取所有 P0 优先级的进行中任务
+            result = await provider.filter_issues(
+                status=["进行中"],
+                priority=["P0"]
+            )
+        """
+        project_key = await self._get_project_key()
+        type_key = await self._get_type_key()
+
+        # 构建搜索条件
+        conditions = []
+
+        # 处理状态过滤
+        if status:
+            field_key = await self.meta.get_field_key(project_key, type_key, "status")
+            resolved_values = []
+            for s in status:
+                try:
+                    val = await self._resolve_field_value(
+                        project_key, type_key, field_key, s
+                    )
+                    resolved_values.append(val)
+                except Exception as e:
+                    logger.warning(f"Failed to resolve status '{s}': {e}")
+                    resolved_values.append(s)
+
+            conditions.append(
+                {
+                    "field_key": field_key,
+                    "operator": "IN",
+                    "value": resolved_values,
+                }
+            )
+
+        # 处理优先级过滤
+        if priority:
+            field_key = await self.meta.get_field_key(project_key, type_key, "priority")
+            resolved_values = []
+            for p in priority:
+                try:
+                    val = await self._resolve_field_value(
+                        project_key, type_key, field_key, p
+                    )
+                    resolved_values.append(val)
+                except Exception as e:
+                    logger.warning(f"Failed to resolve priority '{p}': {e}")
+                    resolved_values.append(p)
+
+            conditions.append(
+                {
+                    "field_key": field_key,
+                    "operator": "IN",
+                    "value": resolved_values,
+                }
+            )
+
+        # 处理负责人过滤
+        if owner:
+            try:
+                user_key = await self.meta.get_user_key(owner)
+                conditions.append(
+                    {
+                        "field_key": "owner",
+                        "operator": "IN",
+                        "value": [user_key],
+                    }
+                )
+            except Exception as e:
+                logger.warning(f"Failed to resolve owner '{owner}': {e}")
+
+        # 构建 search_group
+        search_group = {"conjunction": "AND", "conditions": conditions}
+
+        logger.info(f"Filtering issues with conditions: {conditions}")
+
+        # 调用 API
+        result = await self.api.search_params(
+            project_key=project_key,
+            work_item_type_key=type_key,
+            search_group=search_group,
+            page_num=page_num,
+            page_size=page_size,
+        )
+
+        # 标准化返回结果
+        items = result.get("work_items", [])
+        pagination = result.get("pagination", {})
+
+        return {
+            "items": items,
+            "total": pagination.get("total", len(items)),
+            "page_num": pagination.get("page_num", page_num),
+            "page_size": pagination.get("page_size", page_size),
+        }
+
+    async def get_active_issues(self, page_size: int = 50) -> List[Dict]:
+        """
+        获取活跃的 Issues（未完成状态）
+
+        这是 filter_issues 的便捷封装，适用于快速获取进行中的任务。
+
+        Args:
+            page_size: 每页数量
+
+        Returns:
+            工作项列表
+        """
+        # 获取非已完成状态的 Issues
+        # 注意：具体的状态名称需要根据实际项目配置调整
+        result = await self.filter_issues(
+            status=["待处理", "进行中", "待验证"],
+            page_size=page_size,
+        )
+        return result.get("items", [])
+
+    async def list_available_options(self, field_name: str) -> Dict[str, str]:
+        """
+        列出字段的可用选项
+
+        用于帮助用户了解可用的选项值。
+
+        Args:
+            field_name: 字段名称（如 "status", "priority"）
+
+        Returns:
+            {label: value} 字典
+        """
+        project_key = await self._get_project_key()
+        type_key = await self._get_type_key()
+        field_key = await self.meta.get_field_key(project_key, type_key, field_name)
+        return await self.meta.list_options(project_key, type_key, field_key)
