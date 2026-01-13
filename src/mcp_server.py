@@ -20,7 +20,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from mcp.server.fastmcp import FastMCP
 
@@ -256,7 +256,7 @@ async def get_tasks(
     status: Optional[str] = None,
     priority: Optional[str] = None,
     owner: Optional[str] = None,
-    related_to: Optional[int] = None,
+    related_to: Optional[str] = None,
     page_num: int = 1,
     page_size: int = 50,
 ) -> str:
@@ -267,7 +267,7 @@ async def get_tasks(
     1. 无过滤参数时，返回项目的全部工作项
     2. 支持按任务名称关键词进行高效搜索（推荐）
     3. 支持按状态、优先级、负责人进行灵活过滤
-    4. 支持按关联工作项 ID 过滤（查找与指定工作项关联的项）
+    4. 支持按关联工作项 ID 或名称过滤（查找与指定工作项关联的项）
     5. 如果项目不存在某个字段（如状态），会自动跳过该过滤条件
     6. 支持指定工作项类型（如 "需求管理"、"Issue管理"、"项目管理" 等）
 
@@ -283,8 +283,10 @@ async def get_tasks(
         status: 状态过滤（多个用逗号分隔），如 "待处理,进行中"（可选）。
         priority: 优先级过滤（多个用逗号分隔），如 "P0,P1"（可选）。
         owner: 负责人过滤（姓名或邮箱）（可选）。
-        related_to: 关联工作项 ID（可选）。用于查找与指定工作项关联的其他工作项。
-                   例如：related_to=6181818812 可以查找所有关联到该工作项的项。
+        related_to: 关联工作项 ID 或名称（可选）。用于查找与指定工作项关联的其他工作项。
+                   - 如果是整数或数字字符串，直接作为工作项 ID 使用
+                   - 如果是非数字字符串，自动搜索该名称对应的工作项（精确匹配优先）
+                   例如：related_to="SG06VA1" 或 related_to=6288163810
         page_num: 页码，从 1 开始（默认 1）。
         page_size: 每页数量（默认 50，最大 100）。
 
@@ -305,7 +307,10 @@ async def get_tasks(
         # 获取指定优先级的任务
         get_tasks(priority="P0,P1")
 
-        # 查找与指定工作项关联的工作项
+        # 查找与指定工作项关联的工作项（通过名称）
+        get_tasks(related_to="SG06VA1", work_item_type="Issue管理")
+
+        # 查找与指定工作项关联的工作项（通过 ID）
         get_tasks(
             project="Project Management",
             work_item_type="需求管理",
@@ -322,6 +327,86 @@ async def get_tasks(
         )
     """
     try:
+        # ========== 智能解析 related_to 参数 ==========
+        related_to_id = None
+        if related_to is not None:
+            if isinstance(related_to, str):
+                # 字符串：先尝试解析为数字
+                if related_to.isdigit():
+                    related_to_id = int(related_to)
+                    logger.info("Converted related_to string to ID: %s", related_to_id)
+                else:
+                    # 非数字字符串：按名称搜索工作项
+                    logger.info("Resolving related_to from name: '%s'", related_to)
+                    
+                    # 在常见工作项类型中搜索
+                    search_types = ["项目管理", "需求管理", "Issue管理", "任务", "Epic", "事务管理"]
+                    found_item = None
+                    
+                    for search_type in search_types:
+                        try:
+                            temp_provider = _create_provider(project, search_type)
+                            search_result = await temp_provider.get_tasks(
+                                name_keyword=related_to,
+                                page_num=1,
+                                page_size=10
+                            )
+                            
+                            items = search_result.get("items", [])
+                            if items:
+                                # 优先精确匹配
+                                for item in items:
+                                    if item.get("name") == related_to:
+                                        found_item = item
+                                        logger.info(
+                                            "Found exact match: '%s' (ID: %s, Type: %s)",
+                                            item.get("name"),
+                                            item.get("id"),
+                                            search_type
+                                        )
+                                        break
+                                
+                                # 如果没有精确匹配，取第一个部分匹配
+                                if not found_item:
+                                    found_item = items[0]
+                                    logger.info(
+                                        "Found partial match: '%s' (ID: %s, Type: %s)",
+                                        found_item.get("name"),
+                                        found_item.get("id"),
+                                        search_type
+                                    )
+                                break
+                        except Exception as e:
+                            logger.debug(
+                                "Failed to search in type '%s': %s",
+                                search_type,
+                                e
+                            )
+                            continue
+                    
+                    if found_item:
+                        related_to_id = found_item.get("id")
+                        logger.info(
+                            "Resolved related_to '%s' -> ID: %s",
+                            related_to,
+                            related_to_id
+                        )
+                    else:
+                        return f"未找到名称为 '{related_to}' 的工作项，请检查名称是否正确"
+                        
+            elif isinstance(related_to, int):
+                # 整数：直接使用
+                related_to_id = related_to
+                logger.info("Using related_to as ID: %s", related_to_id)
+            else:
+                # 其他类型：尝试转换
+                try:
+                    related_to_id = int(related_to)
+                    logger.info("Converted related_to to ID: %s", related_to_id)
+                except (ValueError, TypeError):
+                    return f"参数错误: related_to 必须是工作项 ID（整数）或名称（字符串），当前类型: {type(related_to)}"
+        # ========== 智能解析结束 ==========
+
         logger.info(
             "Getting tasks: project=%s, work_item_type=%s, name_keyword=%s, status=%s, priority=%s, owner=%s, related_to=%s, page=%d/%d",
             project,
@@ -330,7 +415,7 @@ async def get_tasks(
             status,
             priority,
             owner,
-            related_to,
+            related_to_id,
             page_num,
             page_size,
         )
@@ -345,7 +430,7 @@ async def get_tasks(
             status=status_list,
             priority=priority_list,
             owner=owner,
-            related_to=related_to,
+            related_to=related_to_id,
             page_num=page_num,
             page_size=min(page_size, 100),
         )

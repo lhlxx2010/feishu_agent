@@ -119,7 +119,9 @@ lark 帮我找 [负责人] 的所有任务
 
 ---
 
-### 6. 按关联项目查询（高级功能）
+### 6. 按关联项目查询（高级功能）⚠️ **存在已知限制**
+
+> **注意**: 由于 FastMCP 框架限制，`related_to` 参数在 MCP 工具调用时可能出现类型转换错误。底层功能正常，但建议使用 Python 代码直接调用。详见"常见错误"第 5 条。
 
 **推荐提示词：**
 ```
@@ -130,10 +132,12 @@ lark 帮我找与 [项目名称] 关联的需求
 ```
 
 **示例：**
-- ✅ `请使用 lark 获取需求管理中与工作项 6181818812 关联的项`
-- ✅ `用 lark 查看关联到 CLRAO-SG0006D2VA（ID: 6181818812）的需求管理`
-- ✅ `lark 帮我找与 CLRAO-SG0006D2VA 关联的所有需求`
-- ✅ `请使用 lark 查询关联到工作项 6181818812 的需求管理`
+- ✅ `请使用 lark 获取需求管理中与工作项 6181818812 关联的项` ⚠️ 可能受限
+- ✅ `用 lark 查看关联到 CLRAO-SG0006D2VA（ID: 6181818812）的需求管理` ⚠️ 可能受限
+- ✅ `lark 帮我找与 CLRAO-SG0006D2VA 关联的所有需求` ⚠️ 可能受限
+- ✅ `请使用 lark 查询关联到工作项 6181818812 的需求管理` ⚠️ 可能受限
+
+**推荐变通方案**：先获取项目 ID，再使用 Python 代码查询（参见"常见错误"第 5 条）
 
 ---
 
@@ -326,6 +330,30 @@ lark 帮我找 [条件1] 且 [条件2] 的 [工作项类型]
 **解决方案**: 
 - 检查环境变量中的认证信息
 - 确认账号有相应权限
+
+### 错误 5: related_to 参数类型错误 ⚠️ **已知限制**
+**问题**: `Parameter 'related_to' must be one of types [integer, null], got string`
+
+**原因**: 
+- FastMCP 框架在参数类型转换时存在限制
+- 底层功能正常，但 MCP 工具层调用受影响
+
+**变通方案**: 
+使用两步查询法：
+```
+1. lark 查询项目管理中的 SG06VA1
+   → 获取 ID: 6288163810
+
+2. 使用 Python 代码直接调用（绕过 MCP 工具）：
+   from src.providers.project.work_item_provider import WorkItemProvider
+   provider = WorkItemProvider(
+       project_name="Project Management",
+       work_item_type_name="Issue管理"
+   )
+   result = await provider.get_tasks(related_to=6288163810)
+```
+
+**状态**: 底层功能已修复并测试通过，等待框架层面解决方案
 
 ---
 
