@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  schedule:
+    - cron: '0 3 * * *'  # 每天 03:00 UTC 运行
   push:
     branches: [ main ]
   pull_request:
@@ -15,7 +17,8 @@ jobs:
   test:
     if: |
       github.event_name == 'push' ||
-      github.event_name == 'pull_request'
+      github.event_name == 'pull_request' ||
+      github.event_name == 'schedule'
     runs-on: ubuntu-latest
     env:
       LARK_APP_ID: cli_dummy_id
@@ -39,10 +42,12 @@ jobs:
         run: uv run pytest tests/unit -v
 
   integration-test:
-    # 集成测试 - 手动触发或主分支推送
+    needs: test  # 必须先通过单元测试
+    # 集成测试 - 手动触发、主分支推送或定时运行
     # 注意：需要 Repository Secrets 配置了 FEISHU_TEST_PROJECT_KEY 等变量，否则测试会被跳过
     if: |
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
       (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     env:
@@ -69,10 +74,11 @@ jobs:
         run: uv run pytest tests/integration -v -m integration
 
   build:
-    needs: test
+    needs: integration-test  # 必须先通过集成测试
+    # Build 仅在定时调度或打 Tag 发布时运行 (不再在每次 push main 时运行)
     if: |
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+      github.event_name == 'schedule' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
