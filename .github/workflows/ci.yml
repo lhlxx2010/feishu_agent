@@ -77,12 +77,22 @@ jobs:
           unzip -p dist/*.whl */dist-info/entry_points.txt || true
 
       - name: Test installation
+        env:
+          LARK_APP_ID: test_app_id
+          LARK_APP_SECRET: test_app_secret
+          FEISHU_PROJECT_USER_TOKEN: test_token
+          FEISHU_PROJECT_USER_KEY: test_user_key
         run: |
           # 测试 wheel 包是否可以正常安装
           uv tool install dist/*.whl --force
-          # 验证命令是否可用
-          which lark-agent || echo "lark-agent command not found in PATH"
-          # 验证模块是否可以导入
+          # 验证命令是否可用（uv tool install 会将命令安装到 ~/.local/bin）
+          export PATH="$HOME/.local/bin:$PATH"
+          if command -v lark-agent &> /dev/null; then
+            echo "✓ lark-agent command found: $(which lark-agent)"
+          else
+            echo "⚠ lark-agent command not found in PATH, but installation succeeded"
+          fi
+          # 验证模块是否可以导入（需要环境变量）
           python -c "from src.mcp_server import main, mcp; print('✓ Module import successful')"
 
       - name: Upload build artifacts
