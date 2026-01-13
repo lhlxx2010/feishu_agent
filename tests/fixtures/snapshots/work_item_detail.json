@@ -1,31 +1,32 @@
 {
-  "created_by": "7387857889332969475",
-  "updated_by": "7387857889332969475",
-  "updated_at": 1768329295144,
-  "simple_name": "zhuliucheng",
-  "deleted_at": 0,
-  "deleted_by": "",
-  "template_id": 1961905,
-  "project_key": "66bb463229e5e58856b4ed19",
-  "created_at": 1768329295144,
-  "work_item_status": {
-    "state_key": "started",
-    "is_archived_state": false,
-    "is_init_state": true,
-    "updated_at": 1768329295144,
-    "updated_by": "7387857889332969475"
-  },
-  "name": "[E2E Test] 自动化测试工作项",
-  "sub_stage": "started",
+  "created_at": 1768332514443,
   "fields": [
     {
+      "field_alias": "template",
       "field_key": "template",
       "field_value": {
         "id": 1961905,
         "version": 5
       },
-      "field_type_key": "work_item_template",
-      "field_alias": "template"
+      "field_type_key": "work_item_template"
+    },
+    {
+      "field_key": "owner",
+      "field_value": "7387857889332969475",
+      "field_type_key": "user",
+      "field_alias": "owner"
+    },
+    {
+      "field_alias": "archiving_status",
+      "field_key": "archiving_status",
+      "field_value": false,
+      "field_type_key": "bool"
+    },
+    {
+      "field_alias": "auto_number",
+      "field_key": "auto_number",
+      "field_value": 20,
+      "field_type_key": "number"
     },
     {
       "field_key": "is_frozen",
@@ -34,40 +35,16 @@
       "field_alias": "is_frozen"
     },
     {
-      "field_value": "这是一个由集成测试自动创建的工作项，测试完成后会自动删除。",
-      "field_type_key": "multi_text",
-      "field_alias": "description",
-      "field_key": "description"
+      "field_key": "field_edd79a",
+      "field_value": null,
+      "field_type_key": "work_item_related_select",
+      "field_alias": ""
     },
     {
-      "field_key": "auto_number",
-      "field_value": 18,
-      "field_type_key": "number",
-      "field_alias": "auto_number"
-    },
-    {
-      "field_alias": "",
       "field_key": "role_owners",
       "field_value": [],
-      "field_type_key": "role_owners"
-    },
-    {
-      "field_key": "start_time",
-      "field_value": 1768329295144,
-      "field_type_key": "date",
-      "field_alias": "start_time"
-    },
-    {
-      "field_key": "archiving_status",
-      "field_value": false,
-      "field_type_key": "bool",
-      "field_alias": "archiving_status"
-    },
-    {
-      "field_key": "current_status_operator",
-      "field_value": null,
-      "field_type_key": "multi_user",
-      "field_alias": "current_status_operator"
+      "field_type_key": "role_owners",
+      "field_alias": ""
     },
     {
       "field_key": "aborted",
@@ -79,20 +56,43 @@
       "field_alias": ""
     },
     {
-      "field_key": "owner",
-      "field_value": "7387857889332969475",
-      "field_type_key": "user",
-      "field_alias": "owner"
+      "field_key": "start_time",
+      "field_value": 1768332514442,
+      "field_type_key": "date",
+      "field_alias": "start_time"
     },
     {
-      "field_key": "field_edd79a",
       "field_value": null,
-      "field_type_key": "work_item_related_select",
-      "field_alias": ""
+      "field_type_key": "multi_user",
+      "field_alias": "current_status_operator",
+      "field_key": "current_status_operator"
+    },
+    {
+      "field_key": "description",
+      "field_value": "这是一个由集成测试自动创建的工作项，测试完成后会自动删除。",
+      "field_type_key": "multi_text",
+      "field_alias": "description"
     }
   ],
+  "simple_name": "zhuliucheng",
+  "name": "[E2E Test] 自动化测试工作项",
   "pattern": "State",
-  "id": 6690000123,
+  "deleted_by": "",
   "work_item_type_key": "670f3cdaddd89a6fa8f18e65",
-  "template_type": ""
+  "project_key": "66bb463229e5e58856b4ed19",
+  "updated_by": "7387857889332969475",
+  "updated_at": 1768332514443,
+  "template_type": "",
+  "work_item_status": {
+    "state_key": "started",
+    "is_archived_state": false,
+    "is_init_state": true,
+    "updated_at": 1768332514442,
+    "updated_by": "7387857889332969475"
+  },
+  "deleted_at": 0,
+  "id": 6689964652,
+  "template_id": 1961905,
+  "sub_stage": "started",
+  "created_by": "7387857889332969475"
 }

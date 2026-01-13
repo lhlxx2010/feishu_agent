@@ -101,7 +101,13 @@ class TestMCPTools:
             assert "name" in item
 
         mock_provider.get_tasks.assert_awaited_once_with(
-            name_keyword=None, status=None, priority=None, owner=None, page_num=1, page_size=50
+            name_keyword=None,
+            status=None,
+            priority=None,
+            owner=None,
+            related_to=None,
+            page_num=1,
+            page_size=50,
         )
 
     @pytest.mark.asyncio

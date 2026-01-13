@@ -110,7 +110,7 @@ def _looks_like_project_key(identifier: str) -> bool:
     return False
 
 
-def _create_provider(project: Optional[str] = None) -> WorkItemProvider:
+def _create_provider(project: Optional[str] = None, work_item_type: Optional[str] = None) -> WorkItemProvider:
     """
     根据 project 参数创建 Provider
 
@@ -119,6 +119,7 @@ def _create_provider(project: Optional[str] = None) -> WorkItemProvider:
 
     Args:
         project: 项目标识符（可以是 project_key 或 project_name），可选
+        work_item_type: 工作项类型名称（可选），如 "需求管理"、"Issue管理" 等
 
     Returns:
         WorkItemProvider 实例
@@ -126,14 +127,20 @@ def _create_provider(project: Optional[str] = None) -> WorkItemProvider:
     if not project:
         # 使用默认项目（从环境变量读取）
         logger.debug("Using default project from FEISHU_PROJECT_KEY")
+        if work_item_type:
+            return WorkItemProvider(work_item_type_name=work_item_type)
         return WorkItemProvider()
     
     if _looks_like_project_key(project):
         logger.debug("Treating '%s' as project_key", project)
+        if work_item_type:
+            return WorkItemProvider(project_key=project, work_item_type_name=work_item_type)
         return WorkItemProvider(project_key=project)
     else:
         # 当作项目名称处理
         logger.debug("Treating '%s' as project_name", project)
+        if work_item_type:
+            return WorkItemProvider(project_name=project, work_item_type_name=work_item_type)
         return WorkItemProvider(project_name=project)
 
 
@@ -244,10 +251,12 @@ async def create_task(
 @mcp.tool()
 async def get_tasks(
     project: Optional[str] = None,
+    work_item_type: Optional[str] = None,
     name_keyword: Optional[str] = None,
     status: Optional[str] = None,
     priority: Optional[str] = None,
     owner: Optional[str] = None,
+    related_to: Optional[int] = None,
     page_num: int = 1,
     page_size: int = 50,
 ) -> str:
@@ -258,18 +267,24 @@ async def get_tasks(
     1. 无过滤参数时，返回项目的全部工作项
     2. 支持按任务名称关键词进行高效搜索（推荐）
     3. 支持按状态、优先级、负责人进行灵活过滤
-    4. 如果项目不存在某个字段（如状态），会自动跳过该过滤条件
+    4. 支持按关联工作项 ID 过滤（查找与指定工作项关联的项）
+    5. 如果项目不存在某个字段（如状态），会自动跳过该过滤条件
+    6. 支持指定工作项类型（如 "需求管理"、"Issue管理"、"项目管理" 等）
 
     Args:
         project: 项目标识符（可选）。可以是:
                 - 项目名称（如 "Project Management"）
                 - project_key（如 "project_xxx"）
                 如不指定，则使用环境变量 FEISHU_PROJECT_KEY 配置的默认项目。
+        work_item_type: 工作项类型名称（可选），如 "需求管理"、"Issue管理"、"项目管理" 等。
+                       如果不指定，默认使用 "问题管理" 类型。
         name_keyword: 任务名称关键词（可选，支持模糊搜索，推荐使用）。
                       例如："SG06VA" 可以搜索所有包含该关键词的任务。
         status: 状态过滤（多个用逗号分隔），如 "待处理,进行中"（可选）。
         priority: 优先级过滤（多个用逗号分隔），如 "P0,P1"（可选）。
         owner: 负责人过滤（姓名或邮箱）（可选）。
+        related_to: 关联工作项 ID（可选）。用于查找与指定工作项关联的其他工作项。
+                   例如：related_to=6181818812 可以查找所有关联到该工作项的项。
         page_num: 页码，从 1 开始（默认 1）。
         page_size: 每页数量（默认 50，最大 100）。
 
@@ -281,15 +296,26 @@ async def get_tasks(
         # 获取默认项目的全部工作项
         get_tasks()
 
+        # 获取"需求管理"类型的工作项
+        get_tasks(project="Project Management", work_item_type="需求管理")
+
         # 按名称关键词搜索（推荐，高效）
         get_tasks(name_keyword="SG06VA")
 
         # 获取指定优先级的任务
         get_tasks(priority="P0,P1")
 
+        # 查找与指定工作项关联的工作项
+        get_tasks(
+            project="Project Management",
+            work_item_type="需求管理",
+            related_to=6181818812
+        )
+
         # 指定项目并组合多个条件过滤
         get_tasks(
             project="Project Management",
+            work_item_type="需求管理",
             name_keyword="SG06VA",
             status="进行中",
             priority="P0"
@@ -297,16 +323,18 @@ async def get_tasks(
     """
     try:
         logger.info(
-            "Getting tasks: project=%s, name_keyword=%s, status=%s, priority=%s, owner=%s, page=%d/%d",
+            "Getting tasks: project=%s, work_item_type=%s, name_keyword=%s, status=%s, priority=%s, owner=%s, related_to=%s, page=%d/%d",
             project,
+            work_item_type,
             name_keyword,
             status,
             priority,
             owner,
+            related_to,
             page_num,
             page_size,
         )
-        provider = _create_provider(project)
+        provider = _create_provider(project, work_item_type)
 
         # 解析逗号分隔的过滤条件
         status_list = [s.strip() for s in status.split(",")] if status else None
@@ -317,6 +345,7 @@ async def get_tasks(
             status=status_list,
             priority=priority_list,
             owner=owner,
+            related_to=related_to,
             page_num=page_num,
             page_size=min(page_size, 100),
         )

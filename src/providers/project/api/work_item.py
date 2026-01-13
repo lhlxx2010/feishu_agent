@@ -153,9 +153,18 @@ class WorkItemAPI:
             raise Exception(f"Filter WorkItem failed: {err_msg}")
 
         result = data.get("data", {})
-        items_count = len(result.get("work_items", []))
-        logger.info("Filter successful: retrieved %d items", items_count)
-        return result
+        # 处理返回格式：可能是 list 或 dict
+        if isinstance(result, list):
+            items_count = len(result)
+            logger.info("Filter successful: retrieved %d items (list format)", items_count)
+            return result
+        elif isinstance(result, dict):
+            items_count = len(result.get("work_items", []))
+            logger.info("Filter successful: retrieved %d items (dict format)", items_count)
+            return result
+        else:
+            logger.warning(f"Unexpected result format: {type(result)}")
+            return {"work_items": [], "pagination": {}}
 
     async def search_params(
         self,

@@ -1,0 +1,807 @@
+[
+  {
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:name",
+    "label": "名称（Title）",
+    "free_add": false,
+    "sub_type_level_class": 0,
+    "field_type_key": "text",
+    "default_value": {
+      "default_appear": 2
+    },
+    "field_tips": "简单概要问题，一般看完后就能大概知道是什么问题",
+    "field_key": "name",
+    "field_alias": "name",
+    "field_name": "名称",
+    "is_validity": 1,
+    "sub_type_level_mode": "",
+    "is_required": 1,
+    "is_visibility": 1
+  },
+  {
+    "role_assign": [
+      {
+        "role": "role_cc5cef",
+        "name": "报告人",
+        "default_appear": 1,
+        "deletable": 1,
+        "member_assign": 3
+      },
+      {
+        "role": "role_a06e00",
+        "name": "经办人",
+        "default_appear": 1,
+        "deletable": 1,
+        "member_assign": 1
+      }
+    ],
+    "field_name": "角色与人员",
+    "field_key": "role_owners",
+    "field_type_key": "role_owners",
+    "field_alias": "",
+    "is_required": 2,
+    "is_visibility": 1,
+    "is_validity": 1
+  },
+  {
+    "is_visibility": 1,
+    "label": "",
+    "field_tips": "",
+    "field_alias": "",
+    "field_type_key": "select",
+    "default_value": {
+      "default_appear": 2
+    },
+    "options": [
+      {
+        "label": "间歇性复现 (Intermittent Reproducible) 30%-80%",
+        "value": "xyv47g4ox",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "始终复现 (Always Reproducible) 100%",
+        "value": "zu3e6ao_p"
+      },
+      {
+        "label": "频繁复现 (Frequently Reproducible) 80%-99%",
+        "value": "7zn431sx3",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "偶尔复现 (Rarely Reproducible) 低于 30%",
+        "value": "_ha1n3n1x",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "无法复现 (Not Reproducible)",
+        "value": "4cmmsrxv1",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "不稳定复现 (Unreliable)",
+        "value": "aj94pt2qf"
+      },
+      {
+        "is_visibility": 1,
+        "label": "待进一步确认 (Unable to Reproduce)",
+        "value": "3kd721tt_",
+        "is_disabled": 2
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "仅一次（Once）",
+        "value": "bxefpy56x"
+      }
+    ],
+    "sub_type_level_mode": "",
+    "is_required": 1,
+    "field_key": "field_e2ce29",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_e2ce29",
+    "field_name": "复现概率（Reproducibility）",
+    "is_validity": 1,
+    "free_add": false,
+    "sub_type_level_class": 0
+  },
+  {
+    "is_visibility": 1,
+    "field_key": "watchers",
+    "field_alias": "watchers",
+    "field_type_key": "multi_user",
+    "default_value": {
+      "default_appear": 2
+    },
+    "is_validity": 1,
+    "field_name": "关注人",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:watchers",
+    "label": "",
+    "field_tips": "",
+    "sub_type_level_mode": "",
+    "is_required": 2,
+    "free_add": false,
+    "sub_type_level_class": 0
+  },
+  {
+    "field_name": "严重等级",
+    "label": "",
+    "field_alias": "",
+    "sub_type_level_class": 0,
+    "field_type_key": "select",
+    "options": [
+      {
+        "label": "S1 严重（Major/High）",
+        "value": "plc96gige",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "S0 致命（Critical）",
+        "value": "eksxs8v1e",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "S2 中等（Moderate/Medium）",
+        "value": "7jtdy75ps",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "S3 轻微（Minor/Low",
+        "value": "su96ntpvx",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "S4 建议（Enhancement）",
+        "value": "q0x9trucs",
+        "is_disabled": 2,
+        "is_visibility": 1
+      }
+    ],
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_a646dc",
+    "free_add": false,
+    "field_tips": "",
+    "is_required": 1,
+    "is_visibility": 2,
+    "is_validity": 3,
+    "sub_type_level_mode": "",
+    "field_key": "field_a646dc",
+    "default_value": {
+      "default_appear": 1,
+      "value": {
+        "label": "S1 严重（Major/High）",
+        "value": "plc96gige"
+      }
+    }
+  },
+  {
+    "field_name": "预期结果",
+    "is_validity": 1,
+    "field_tips": "",
+    "is_required": 1,
+    "field_type_key": "text",
+    "free_add": false,
+    "sub_type_level_class": 0,
+    "field_key": "field_2cc57c",
+    "field_alias": "",
+    "default_value": {
+      "default_appear": 2
+    },
+    "is_visibility": 1,
+    "label": "",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_2cc57c",
+    "sub_type_level_mode": ""
+  },
+  {
+    "is_visibility": 1,
+    "field_name": "实际结果",
+    "default_value": {
+      "default_appear": 2
+    },
+    "free_add": false,
+    "field_tips": "",
+    "field_key": "field_ef8236",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_ef8236",
+    "sub_type_level_class": 0,
+    "is_required": 1,
+    "field_alias": "",
+    "field_type_key": "text",
+    "is_validity": 1,
+    "sub_type_level_mode": "",
+    "label": ""
+  },
+  {
+    "is_visibility": 1,
+    "field_key": "priority",
+    "label": "",
+    "is_required": 1,
+    "default_value": {
+      "default_appear": 1,
+      "value": {
+        "label": "P1",
+        "value": "option_2"
+      }
+    },
+    "sub_type_level_class": 0,
+    "field_name": "优先级",
+    "field_alias": "priority",
+    "free_add": false,
+    "sub_type_level_mode": "",
+    "field_type_key": "select",
+    "options": [
+      {
+        "value": "option_2",
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "P1"
+      },
+      {
+        "label": "P0",
+        "value": "option_1",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_visibility": 1,
+        "label": "P2",
+        "value": "option_3",
+        "is_disabled": 2
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "P3",
+        "value": "ckzn_hjzp"
+      }
+    ],
+    "is_validity": 1,
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:priority",
+    "field_tips": ""
+  },
+  {
+    "field_type_key": "multi_text",
+    "default_value": {
+      "default_appear": 2
+    },
+    "label": "",
+    "is_required": 2,
+    "field_name": "How to fix",
+    "is_validity": 1,
+    "free_add": false,
+    "sub_type_level_mode": "",
+    "is_visibility": 1,
+    "field_key": "field_644690",
+    "field_alias": "",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_644690",
+    "field_tips": "",
+    "sub_type_level_class": 0
+  },
+  {
+    "is_validity": 1,
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_470b75",
+    "free_add": false,
+    "sub_type_level_mode": "",
+    "field_type_key": "multi_file",
+    "default_value": {
+      "default_appear": 2
+    },
+    "field_alias": "",
+    "field_key": "field_470b75",
+    "label": "",
+    "sub_type_level_class": 0,
+    "is_required": 2,
+    "is_visibility": 1,
+    "field_name": "附件（Attachments）",
+    "field_tips": "上传log，截图，视频等附件信息"
+  },
+  {
+    "sub_type_level_mode": "",
+    "sub_type_level_class": 0,
+    "field_key": "description",
+    "is_validity": 1,
+    "is_required": 1,
+    "is_visibility": 1,
+    "field_name": "描述",
+    "default_value": {
+      "default_appear": 2
+    },
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:description",
+    "free_add": false,
+    "field_tips": "",
+    "field_alias": "description",
+    "field_type_key": "multi_text",
+    "label": ""
+  },
+  {
+    "field_tips": "",
+    "is_visibility": 1,
+    "field_name": "环境信息描述",
+    "is_validity": 1,
+    "free_add": false,
+    "field_key": "field_e33b0e",
+    "field_type_key": "multi_text",
+    "sub_type_level_class": 0,
+    "is_required": 1,
+    "label": "",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_e33b0e",
+    "field_alias": "",
+    "default_value": {
+      "default_appear": 2
+    },
+    "sub_type_level_mode": ""
+  },
+  {
+    "field_name": "功能模块/分类",
+    "options": [
+      {
+        "label": "硬件问题",
+        "value": "ip7dx3xfe",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "AV",
+        "value": "2058dqi_0",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_visibility": 1,
+        "label": "Wireless",
+        "value": "zs6w4vm51",
+        "is_disabled": 2
+      },
+      {
+        "label": "System",
+        "value": "2l3fbnlzo",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "APPS",
+        "value": "wukzsflqy",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "DVB",
+        "value": "0fy8piqey",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_visibility": 1,
+        "label": "Linux",
+        "value": "m5_zyn702",
+        "is_disabled": 2
+      },
+      {
+        "value": "yw7squpfr",
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "Router"
+      },
+      {
+        "value": "u82uh2ibe",
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "Hardware"
+      },
+      {
+        "label": "Skyway",
+        "value": "3rcygicsl",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_visibility": 1,
+        "label": "OTA",
+        "value": "OTA",
+        "is_disabled": 2
+      }
+    ],
+    "is_validity": 1,
+    "free_add": true,
+    "is_required": 1,
+    "field_key": "field_fd9c7e",
+    "field_type_key": "select",
+    "default_value": {
+      "default_appear": 2
+    },
+    "field_alias": "",
+    "field_tips": "",
+    "sub_type_level_class": 0,
+    "is_visibility": 1,
+    "label": "",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_fd9c7e",
+    "sub_type_level_mode": ""
+  },
+  {
+    "field_key": "field_b6dd30",
+    "default_value": {
+      "default_appear": 1,
+      "value": {
+        "label": "Android U - 14",
+        "value": "kw65p2dot"
+      }
+    },
+    "is_validity": 1,
+    "free_add": false,
+    "field_tips": "",
+    "sub_type_level_mode": "",
+    "is_required": 1,
+    "field_name": "Android 大版本",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_b6dd30",
+    "sub_type_level_class": 0,
+    "options": [
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "Android ALL",
+        "value": "vge0l9__5"
+      },
+      {
+        "is_visibility": 1,
+        "label": "Android Q - 10",
+        "value": "btnhduahr",
+        "is_disabled": 2
+      },
+      {
+        "label": "Android R - 11",
+        "value": "trpqex1jz",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "Android S - 12",
+        "value": "4h5n9va8m",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "Android T - 13",
+        "value": "o1fa_v28n",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "Android U - 14",
+        "value": "kw65p2dot",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "value": "oqduuwk_s",
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "Android W - 16"
+      },
+      {
+        "value": "7nbo0puww",
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "Android Y - 18"
+      },
+      {
+        "value": "8_9bxq1n1",
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "Linux"
+      }
+    ],
+    "field_alias": "",
+    "field_type_key": "select",
+    "is_visibility": 1,
+    "label": ""
+  },
+  {
+    "is_visibility": 1,
+    "field_alias": "",
+    "default_value": {
+      "default_appear": 2
+    },
+    "is_validity": 1,
+    "is_required": 2,
+    "field_key": "field_f4e228",
+    "label": "",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_f4e228",
+    "free_add": false,
+    "field_tips": "",
+    "field_name": "关联测试用例",
+    "field_type_key": "work_item_related_multi_select",
+    "sub_type_level_mode": "",
+    "sub_type_level_class": 0
+  },
+  {
+    "is_required": 2,
+    "field_alias": "",
+    "field_name": "Due date",
+    "default_value": {
+      "default_appear": 2
+    },
+    "free_add": false,
+    "field_tips": "",
+    "sub_type_level_mode": "",
+    "sub_type_level_class": 0,
+    "field_key": "field_2eaeea",
+    "field_type_key": "date",
+    "label": "",
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_2eaeea",
+    "is_visibility": 1,
+    "is_validity": 1
+  },
+  {
+    "is_validity": 1,
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_304636",
+    "free_add": true,
+    "is_visibility": 2,
+    "field_key": "field_304636",
+    "field_type_key": "select",
+    "label": "",
+    "field_tips": "",
+    "sub_type_level_class": 0,
+    "field_alias": "",
+    "field_name": "Model",
+    "default_value": {
+      "default_appear": 2
+    },
+    "options": [
+      {
+        "label": "SR315G",
+        "value": "SR315G",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SG401B",
+        "value": "SG401B",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SR0006D2R2-MMR 630-Router",
+        "value": "SR0006D2R2-MMR 630-Router",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "SG0006D2VR-MPR 630-ONT",
+        "value": "SG0006D2VR-MPR 630-ONT"
+      },
+      {
+        "label": "SR1616D2R-MMR 630-B-Router",
+        "value": "SR1616D2R-MMR 630-B-Router",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SR0006D2R1-MMR 615-Router",
+        "value": "SR0006D2R1-MMR 615-Router",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_visibility": 1,
+        "label": "SG0006D2VR1-MPR 615-ONT",
+        "value": "SG0006D2VR1-MPR 615-ONT",
+        "is_disabled": 2
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "SS000244X-MGS 2404X-Switch",
+        "value": "SS000244X-MGS 2404X-Switch"
+      },
+      {
+        "is_visibility": 1,
+        "label": "SG00002R-MPB G1-ONT",
+        "value": "SG00002R-MPB G1-ONT",
+        "is_disabled": 2
+      },
+      {
+        "label": "SS00008P2G-MGS 0802P-Switch",
+        "value": "SS00008P2G-MGS 0802P-Switch",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SS00024P4G-MGS 2404P-Switch",
+        "value": "SS00024P4G-MGS 2404P-Switch",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "SG6D4VR",
+        "value": "SG6D4VR"
+      },
+      {
+        "value": "EVO6022GP3",
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "EVO6022GP3"
+      },
+      {
+        "is_visibility": 1,
+        "label": "SEIB04ALASKA",
+        "value": "SEIB04ALASKA",
+        "is_disabled": 2
+      },
+      {
+        "label": "SR6D2R",
+        "value": "SR6D2R",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "SG401D",
+        "value": "SG401D"
+      },
+      {
+        "label": "EVO1111XP",
+        "value": "EVO1111XP",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SF6D2U",
+        "value": "SF6D2U",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_visibility": 1,
+        "label": "NA",
+        "value": "NA",
+        "is_disabled": 2
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "SG6BSAA",
+        "value": "SG6BSAA"
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "MTN-Benin-SM500 Lite-R",
+        "value": "MTN-Benin-SM500 Lite-R"
+      },
+      {
+        "label": "CLARO-SR1616D2A",
+        "value": "CLARO-SR1616D2A",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SD6BKLC",
+        "value": "SD6BKLC",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SG0006D2VA",
+        "value": "SG0006D2VA",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SG7D4VA",
+        "value": "SG7D4VA",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "value": "SG7H6VA",
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "SG7H6VA"
+      },
+      {
+        "label": "EVO6022AP",
+        "value": "EVO6022AP",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "CPE",
+        "value": "CPE",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SR6D2VA",
+        "value": "SR6D2VA",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "is_disabled": 2,
+        "is_visibility": 1,
+        "label": "SG06VA",
+        "value": "SG06VA"
+      },
+      {
+        "label": "CI",
+        "value": "CI",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SG501AA",
+        "value": "SG501AA",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "CICD",
+        "value": "CICD",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "Test System-SEI-ONT&Router-samples testing",
+        "value": "Test System-SEI-ONT&Router-samples testing",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SEI740MTN",
+        "value": "SEI740MTN",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SD6BKGC",
+        "value": "SD6BKGC",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SG104",
+        "value": "SG104",
+        "is_disabled": 2,
+        "is_visibility": 1
+      },
+      {
+        "label": "SG104D",
+        "value": "SG104D",
+        "is_disabled": 2,
+        "is_visibility": 1
+      }
+    ],
+    "sub_type_level_mode": "",
+    "is_required": 1
+  },
+  {
+    "field_uuid": "67dc030b05a5fc19988f791b:670f3cdaddd89a6fa8f18e65:field_54417b",
+    "free_add": false,
+    "sub_type_level_mode": "",
+    "is_required": 2,
+    "field_key": "field_54417b",
+    "label": "",
+    "field_alias": "",
+    "sub_type_level_class": 0,
+    "is_visibility": 1,
+    "field_name": "解决版本",
+    "field_type_key": "work_item_related_multi_select",
+    "default_value": {
+      "default_appear": 2
+    },
+    "is_validity": 1,
+    "field_tips": ""
+  }
+]

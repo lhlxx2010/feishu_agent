@@ -409,6 +409,7 @@ class WorkItemProvider(Provider):
         status: Optional[List[str]] = None,
         priority: Optional[List[str]] = None,
         owner: Optional[str] = None,
+        related_to: Optional[int] = None,
         page_num: int = 1,
         page_size: int = 50,
     ) -> Dict[str, Any]:
@@ -420,12 +421,14 @@ class WorkItemProvider(Provider):
         - 字段不存在时自动跳过该过滤条件
         - 支持多维度组合过滤
         - 如果提供 name_keyword，优先使用高效的 filter API
+        - 支持按关联工作项 ID 过滤（客户端过滤）
 
         Args:
             name_keyword: 任务名称关键词（可选，支持模糊搜索）
             status: 状态列表（可选，如 ["待处理", "进行中"]）
             priority: 优先级列表（可选，如 ["P0", "P1"]）
             owner: 负责人（可选，姓名或邮箱）
+            related_to: 关联工作项 ID（可选），用于查找与指定工作项关联的其他工作项
             page_num: 页码（从 1 开始）
             page_size: 每页数量
 
@@ -446,17 +449,93 @@ class WorkItemProvider(Provider):
 
             # 按优先级过滤
             result = await provider.get_tasks(priority=["P0", "P1"])
+
+            # 查找与指定工作项关联的工作项
+            result = await provider.get_tasks(related_to=6181818812)
         """
         project_key = await self._get_project_key()
         type_key = await self._get_type_key()
 
+        # 特殊处理：当只有 related_to 参数时，需要获取所有工作项进行客户端过滤
+        # 因为关联字段不支持 API 级别的过滤
+        if related_to and not name_keyword and not status and not priority and not owner:
+            logger.info(f"Getting all items for related_to filtering: {related_to}")
+            
+            all_items = []
+            current_page = 1
+            batch_size = 100
+            
+            while True:
+                result = await self.api.filter(
+                    project_key=project_key,
+                    work_item_type_keys=[type_key],
+                    page_num=current_page,
+                    page_size=batch_size,
+                )
+                
+                # 标准化返回结果
+                if isinstance(result, list):
+                    items = result
+                elif isinstance(result, dict):
+                    items = result.get("work_items", [])
+                else:
+                    break
+                
+                if not items:
+                    break
+                
+                all_items.extend(items)
+                logger.debug(f"Fetched page {current_page}, got {len(items)} items, total: {len(all_items)}")
+                
+                # 如果这一页的数据少于 batch_size，说明已经是最后一页
+                if len(items) < batch_size:
+                    break
+                
+                current_page += 1
+                
+                # 安全限制：最多获取 20 页（2000 条记录）
+                if current_page > 20:
+                    logger.warning("Reached maximum page limit (20 pages)")
+                    break
+            
+            logger.info(f"Fetched {len(all_items)} items in total, now filtering by related_to={related_to}")
+            
+            # 过滤关联工作项
+            filtered_items = []
+            for item in all_items:
+                is_related = False
+                fields = item.get("fields", [])
+                for field in fields:
+                    field_value = field.get("field_value")
+                    if field_value:
+                        if isinstance(field_value, list):
+                            if related_to in field_value:
+                                is_related = True
+                                break
+                        elif field_value == related_to:
+                            is_related = True
+                            break
+                if is_related:
+                    filtered_items.append(item)
+            
+            logger.info(f"Found {len(filtered_items)} items related to {related_to}")
+            
+            return {
+                "items": filtered_items,
+                "total": len(filtered_items),
+                "page_num": 1,
+                "page_size": len(filtered_items),
+            }
+        
         # 如果提供了 name_keyword，优先使用 filter API（更高效）
-        # filter API 支持 work_item_name 和 work_item_status，但不支持 priority/owner
+        # filter API 支持 work_item_name 和 work_item_status，但不支持 priority/owner/related_to
         if name_keyword:
             logger.info(f"Using filter API for name keyword search: '{name_keyword}'")
 
             # 准备 filter API 参数
-            filter_kwargs = {"work_item_name": name_keyword}
+            filter_kwargs = {}
+            if name_keyword:
+                filter_kwargs["work_item_name"] = name_keyword
 
             # filter API 支持 status，但需要转换为状态值
             if status:
@@ -482,7 +561,7 @@ class WorkItemProvider(Provider):
                 except Exception as e:
                     logger.warning(f"Status field not available for filter API: {e}")
 
-            # filter API 不支持 priority 和 owner，记录警告
+            # filter API 不支持 priority、owner 和 related_to，记录警告
             if priority:
                 logger.warning(
                     "Filter API does not support priority filter, "
@@ -491,6 +570,11 @@ class WorkItemProvider(Provider):
             if owner:
                 logger.warning(
                     "Filter API does not support owner filter, "
+                    "will filter results after retrieval"
+                )
+            if related_to:
+                logger.warning(
+                    "Filter API does not support related_to filter, "
                     "will filter results after retrieval"
                 )
 
@@ -511,12 +595,27 @@ class WorkItemProvider(Provider):
                     "page_size": page_size,
                 }
                 logger.debug("API returned list format, converted to standard format")
-            else:
+            elif isinstance(result, dict):
                 items = result.get("work_items", [])
                 pagination = result.get("pagination", {})
+                # 如果 pagination 不是字典，创建默认的
+                if not isinstance(pagination, dict):
+                    pagination = {
+                        "total": result.get("total", len(items)),
+                        "page_num": page_num,
+                        "page_size": page_size,
+                    }
+            else:
+                logger.warning(f"Unexpected result type: {type(result)}, value: {result}")
+                items = []
+                pagination = {
+                    "total": 0,
+                    "page_num": page_num,
+                    "page_size": page_size,
+                }
 
             # 如果 filter API 不支持某些条件，在结果中进一步筛选
-            if priority or owner:
+            if priority or owner or related_to:
                 filtered_items = []
                 for item in items:
                     # 检查优先级
@@ -540,11 +639,29 @@ class WorkItemProvider(Provider):
                             # 如果无法解析 owner，跳过该过滤条件
                             pass
 
+                    # 检查关联工作项
+                    if related_to:
+                        is_related = False
+                        fields = item.get("fields", [])
+                        for field in fields:
+                            field_value = field.get("field_value")
+                            # 检查字段值是否包含目标工作项 ID
+                            if field_value:
+                                if isinstance(field_value, list):
+                                    if related_to in field_value:
+                                        is_related = True
+                                        break
+                                elif field_value == related_to:
+                                    is_related = True
+                                    break
+                        if not is_related:
+                            continue
+
                     filtered_items.append(item)
 
                 items = filtered_items
                 logger.info(
-                    f"Filtered results: {len(items)} items after priority/owner filtering"
+                    f"Filtered results: {len(items)} items after priority/owner/related_to filtering"
                 )
 
             logger.info(
@@ -672,6 +789,33 @@ class WorkItemProvider(Provider):
         logger.info(
             f"Retrieved {len(items)} items (total: {pagination.get('total', 0)})"
         )
+
+        # 如果指定了 related_to，进行客户端过滤
+        # search_params API 不支持关联字段过滤
+        if related_to:
+            logger.info(f"Applying client-side related_to filter: {related_to}")
+            filtered_items = []
+            for item in items:
+                is_related = False
+                fields = item.get("fields", [])
+                for field in fields:
+                    field_value = field.get("field_value")
+                    # 检查字段值是否包含目标工作项 ID
+                    if field_value:
+                        if isinstance(field_value, list):
+                            if related_to in field_value:
+                                is_related = True
+                                break
+                        elif field_value == related_to:
+                            is_related = True
+                            break
+                if is_related:
+                    filtered_items.append(item)
+            
+            items = filtered_items
+            logger.info(
+                f"Filtered results: {len(items)} items after related_to filtering"
+            )
 
         return {
             "items": items,

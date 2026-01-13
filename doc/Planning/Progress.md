@@ -28,6 +28,10 @@
     - `filter_issues`: 支持按状态、优先级、负责人过滤。
     - `get_active_issues`: 快速获取活跃任务。
     - `list_available_options`: 获取字段可用选项。
+- [x] **关联查询** (2026-01-14 新增):
+    - `get_tasks` 新增 `related_to` 参数：支持按关联工作项 ID 过滤。
+    - 实现客户端过滤逻辑，遍历工作项字段查找关联关系。
+    - 支持查询"需求管理"类型中关联到特定"项目管理"工作项的需求。
 
 #### 3. 基础设施增强 (Infrastructure Enhancement) (2026-01-13 新增)
 - [x] **Retry 机制**: 改造 `ProjectClient`，引入 `tenacity` 库。
