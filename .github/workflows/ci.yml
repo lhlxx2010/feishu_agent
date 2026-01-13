@@ -39,8 +39,11 @@ jobs:
         run: uv run pytest tests/unit -v
 
   integration-test:
-    # 集成测试 - 仅手动触发或定时运行
-    if: github.event_name == 'workflow_dispatch'
+    # 集成测试 - 手动触发或主分支推送
+    # 注意：需要 Repository Secrets 配置了 FEISHU_TEST_PROJECT_KEY 等变量，否则测试会被跳过
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     env:
       LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
