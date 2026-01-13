@@ -53,6 +53,69 @@ uv run main.py
 
 可以使用 `tail -f log/agent.log` 实时查看运行日志。
 
+## 🔌 MCP 客户端配置
+
+### Cursor IDE 配置
+
+在 Cursor 中配置 MCP server，编辑 `~/.cursor/mcp.json`（Linux/macOS）或 `%APPDATA%\Cursor\mcp.json`（Windows），添加以下配置：
+
+```json
+{
+  "mcpServers": {
+    "feishu-agent": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/path/to/feishu_agent",
+        "main.py"
+      ]
+    }
+  }
+}
+```
+
+**配置说明：**
+*   `command`: 使用 `uv` 命令运行服务
+*   `--directory`: 指定项目目录的绝对路径（请替换为您的实际路径）
+*   `main.py`: 服务入口文件
+
+**注意事项：**
+*   确保 `uv` 已安装并在系统 PATH 中
+*   确保项目目录路径正确
+*   确保 `.env` 文件已正确配置飞书凭证
+*   配置修改后需要重启 Cursor 才能生效
+
+### Claude Desktop 配置
+
+在 Claude Desktop 中配置，编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`（macOS）或 `%APPDATA%\Claude\claude_desktop_config.json`（Windows），添加类似的配置：
+
+```json
+{
+  "mcpServers": {
+    "feishu-agent": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/path/to/feishu_agent",
+        "main.py"
+      ]
+    }
+  }
+}
+```
+
+### 使用方式
+
+配置完成后，在 Cursor 或 Claude Desktop 中可以直接通过自然语言调用飞书项目相关功能，例如：
+
+*   "查询我的活跃工作项"
+*   "创建一个新的任务"
+*   "查看项目中的 Bug 列表"
+
+MCP server 会自动处理这些请求并调用相应的飞书 API。
+
 ## 🧪 测试 (Testing)
 
 本项目严格遵循 **TDD (测试驱动开发)** 流程。
