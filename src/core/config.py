@@ -12,8 +12,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    LARK_APP_ID: str
-    LARK_APP_SECRET: str
+    LARK_APP_ID: str | None = None  # 可选：仅在使用 IM 功能时需要
+    LARK_APP_SECRET: str | None = None  # 可选：仅在使用 IM 功能时需要
     LARK_ENCRYPT_KEY: str | None = None
     LARK_VERIFICATION_TOKEN: str | None = None
 
