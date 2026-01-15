@@ -104,6 +104,10 @@ class MetadataManager:
         # L4: project_key -> type_key -> field_key -> {label -> value}
         self._option_cache: Dict[str, Dict[str, Dict[str, Dict[str, str]]]] = {}
 
+        # L5: project_key -> type_key -> {role_name -> role_key} (角色名称映射)
+        # 例如: {"67dc...": {"670f...": {"报告人": "role_cc5cef", "经办人": "role_a06e00"}}}
+        self._role_cache: Dict[str, Dict[str, Dict[str, str]]] = {}
+
         # L-User: identifier (name/email) -> user_key
         self._user_cache: Dict[str, str] = {}
 
@@ -131,6 +135,7 @@ class MetadataManager:
         self._type_cache.clear()
         self._field_cache.clear()
         self._option_cache.clear()
+        self._role_cache.clear()
         self._user_cache.clear()
         self._project_last_loaded = None
         self._type_last_loaded.clear()
@@ -471,6 +476,7 @@ class MetadataManager:
             # 准备临时字典
             temp_field_map = {}
             temp_option_map = {}
+            temp_role_map = {}
 
             # 调用 API 获取字段列表
             fields = await self.field_api.get_all_fields(project_key, type_key)
@@ -502,9 +508,40 @@ class MetadataManager:
                         if label and value:
                             temp_option_map[f_key][label] = value
 
+                # 解析角色缓存: 从 current_status_operator_role 字段的 options 中提取
+                # options 格式: [{"label": "经办人", "value": "role_xxx_role_a06e00"}, ...]
+                if f_key == "current_status_operator_role" and options:
+                    for opt in options:
+                        label = opt.get("label")  # 如 "经办人", "报告人"
+                        value = opt.get("value")  # 如 "role_xxx_670f_role_a06e00"
+                        if label and value:
+                            # 提取短 role_key
+                            # "role_67dc..._670f..._role_a06e00" -> "role_a06e00"
+                            parts = value.split("_")
+                            if len(parts) >= 2 and parts[-2] == "role":
+                                short_role_key = f"role_{parts[-1]}"
+                            elif value.startswith("role_"):
+                                short_role_key = value
+                            else:
+                                # 兜底: 使用完整的后缀部分
+                                short_role_key = value.split("_")[-1]
+                                if not short_role_key.startswith("role"):
+                                    short_role_key = "role_" + short_role_key
+
+                            temp_role_map[label] = short_role_key
+                            logger.debug(
+                                f"Cache set: role_name='{label}' -> role_key='{short_role_key}'"
+                            )
+
             # 原子性更新缓存
             self._field_cache[project_key][type_key] = temp_field_map
             self._option_cache[project_key][type_key] = temp_option_map
+
+            # 更新角色缓存
+            if project_key not in self._role_cache:
+                self._role_cache[project_key] = {}
+            self._role_cache[project_key][type_key] = temp_role_map
+
             # 更新最后加载时间戳
             if project_key not in self._field_last_loaded:
                 self._field_last_loaded[project_key] = {}
@@ -618,6 +655,71 @@ class MetadataManager:
             .get(field_key, {})
             .copy()
         )
+
+    # ========== L5: Role ==========
+
+    async def get_role_key(
+        self, project_key: str, type_key: str, role_name: str
+    ) -> str:
+        """
+        根据角色名称获取 Role Key
+
+        Args:
+            project_key: 项目空间 Key
+            type_key: 工作项类型 Key
+            role_name: 角色名称（如 "经办人", "报告人"）
+
+        Returns:
+            Role Key (如 "role_a06e00")
+
+        Raises:
+            Exception: 角色未找到时抛出异常
+        """
+        await self._ensure_field_cache(project_key, type_key)
+
+        role_map = self._role_cache.get(project_key, {}).get(type_key, {})
+
+        # 1. 精确匹配名称
+        if role_name in role_map:
+            logger.debug(f"Cache hit: role_name='{role_name}'")
+            return role_map[role_name]
+
+        # 2. 检查是否本身就是 Key
+        if role_name in role_map.values():
+            return role_name
+
+        available_roles = list(role_map.keys())
+        raise Exception(f"角色 '{role_name}' 未找到。可用角色: {available_roles}")
+
+    async def get_role_name(
+        self, project_key: str, type_key: str, role_key: str
+    ) -> Optional[str]:
+        """
+        根据 Role Key 获取角色名称（反向查找）
+
+        Args:
+            project_key: 项目空间 Key
+            type_key: 工作项类型 Key
+            role_key: Role Key
+
+        Returns:
+            角色名称，未找到返回 None
+        """
+        await self._ensure_field_cache(project_key, type_key)
+
+        role_map = self._role_cache.get(project_key, {}).get(type_key, {})
+
+        # 1. 精确匹配优先
+        for name, key in role_map.items():
+            if key == role_key:
+                return name
+
+        # 2. 部分匹配 (作为备选)
+        for name, key in role_map.items():
+            if role_key and key in role_key:
+                return name
+
+        return None
 
     # ========== L-User: User ==========
 

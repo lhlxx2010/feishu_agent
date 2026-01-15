@@ -884,7 +884,7 @@ class WorkItemProvider(Provider):
                     else:
                         # 使用提取方法处理非字符串值（如字典或列表）
                         readable_val = self._extract_readable_field_value(f_val)
-                elif f_type in ["multi_user", "role_owners"]:
+                elif f_type == "multi_user":
                     if isinstance(f_val, list):
                         new_list = []
                         for u in f_val:
@@ -893,6 +893,46 @@ class WorkItemProvider(Provider):
                             else:
                                 new_list.append(self._extract_readable_field_value(u))
                         readable_val = new_list
+                elif f_type == "role_owners":
+                    # Parse role_owners structure: [{"role": "role_key", "owners": ["user_key"]}]
+                    if isinstance(f_val, list):
+                        readable_roles = []
+                        for role_item in f_val:
+                            if not isinstance(role_item, dict):
+                                continue
+
+                            role_key = role_item.get("role")
+                            owners = role_item.get("owners")
+
+                            # 防御性检查
+                            if not role_key:
+                                continue
+
+                            if not isinstance(owners, list):
+                                owners = []
+
+                            # Resolve Role Name
+                            role_name = role_key
+                            try:
+                                name = await self.meta.get_role_name(
+                                    project_key, type_key, role_key
+                                )
+                                if name:
+                                    role_name = name
+                            except Exception as e:
+                                logger.debug(
+                                    f"Failed to resolve role name for key '{role_key}': {e}"
+                                )
+
+                            # Resolve Owner Names
+                            owner_names = []
+                            for u in owners:
+                                owner_names.append(user_map.get(u, u))
+
+                            readable_roles.append(
+                                {"role": role_name, "owners": owner_names}
+                            )
+                        readable_val = readable_roles
                 # 关联工作项
                 elif f_type in [
                     "work_item_related_select",

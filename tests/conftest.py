@@ -80,18 +80,6 @@ logger = logging.getLogger(__name__)
 logger.info("测试日志配置完成: level=DEBUG")
 
 
-# 启用 pytest 的 asyncio 支持
-@pytest.fixture(scope="session")
-def event_loop():
-    """为每个测试会话创建默认事件循环实例。"""
-    logger.debug("为测试会话创建事件循环")
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    yield loop
-    logger.debug("关闭事件循环")
-    loop.close()
-
-
 @pytest.fixture(autouse=True)
 def log_test_start(request):
     """为每个测试记录开始和结束日志。"""

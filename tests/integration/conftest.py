@@ -68,6 +68,7 @@ def reset_singletons():
     注意：不在teardown时关闭client，避免影响后续测试
     """
     import src.core.project_client as pc_module
+    from src.providers.project.managers.metadata_manager import MetadataManager
 
     # 测试前：强制重置单例引用，确保每个测试使用新的实例
     # 如果存在旧的client且已关闭，先清理它
@@ -86,11 +87,15 @@ def reset_singletons():
     else:
         pc_module._project_client = None
 
+    # 同时重置 MetadataManager 单例
+    MetadataManager._instance = None
+
     yield
 
     # 测试后：只重置单例引用，不关闭client
     # 这样可以避免影响后续测试，让每个测试都创建新的client
     pc_module._project_client = None
+    MetadataManager._instance = None
 
 
 @pytest.fixture

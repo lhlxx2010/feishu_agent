@@ -1,8 +1,126 @@
 {
   "items": [
     {
-      "sub_stage": "started",
       "current_nodes": [],
+      "updated_by": "7387857889332969475",
+      "updated_at": 1768494213513,
+      "deleted_at": 0,
+      "work_item_type_key": "670f3cdaddd89a6fa8f18e65",
+      "project_key": "66bb463229e5e58856b4ed19",
+      "created_at": 1768494212507,
+      "simple_name": "zhuliucheng",
+      "template_id": 1961905,
+      "id": 6698948556,
+      "created_by": "7387857889332969475",
+      "fields": [
+        {
+          "help_description": "",
+          "field_key": "template",
+          "field_value": {
+            "id": 1961905,
+            "version": 5
+          },
+          "field_type_key": "work_item_template",
+          "field_alias": "template"
+        },
+        {
+          "field_value": "7387857889332969475",
+          "field_type_key": "user",
+          "field_alias": "owner",
+          "help_description": "",
+          "field_key": "owner"
+        },
+        {
+          "field_key": "description",
+          "field_value": "这是一个由集成测试自动创建的工作项，测试完成后会自动删除。",
+          "field_type_key": "multi_text",
+          "field_alias": "description",
+          "help_description": ""
+        },
+        {
+          "field_key": "start_time",
+          "field_value": 1768494212373,
+          "field_type_key": "date",
+          "field_alias": "start_time",
+          "help_description": ""
+        },
+        {
+          "field_alias": "",
+          "help_description": "",
+          "field_key": "role_owners",
+          "field_value": null,
+          "field_type_key": "role_owners"
+        },
+        {
+          "field_key": "aborted",
+          "field_value": {
+            "reason": "",
+            "is_aborted": false
+          },
+          "field_type_key": "aborted",
+          "field_alias": "",
+          "help_description": ""
+        },
+        {
+          "field_alias": "",
+          "help_description": "",
+          "field_key": "field_edd79a",
+          "field_value": null,
+          "field_type_key": "work_item_related_select"
+        },
+        {
+          "field_key": "is_frozen",
+          "field_value": false,
+          "field_type_key": "bool",
+          "field_alias": "is_frozen",
+          "help_description": ""
+        },
+        {
+          "field_alias": "current_status_operator",
+          "help_description": "",
+          "field_key": "current_status_operator",
+          "field_value": null,
+          "field_type_key": "multi_user"
+        },
+        {
+          "field_type_key": "number",
+          "field_alias": "auto_number",
+          "help_description": "",
+          "field_key": "auto_number",
+          "field_value": 78
+        },
+        {
+          "field_alias": "archiving_status",
+          "help_description": "",
+          "field_key": "archiving_status",
+          "field_value": false,
+          "field_type_key": "bool"
+        }
+      ],
+      "work_item_status": {
+        "state_key": "started",
+        "is_archived_state": false,
+        "is_init_state": true,
+        "updated_at": 1768494212373,
+        "updated_by": "7387857889332969475"
+      },
+      "deleted_by": "",
+      "name": "[E2E Test] 已更新的工作项",
+      "pattern": "State",
+      "sub_stage": "started",
+      "template_type": ""
+    },
+    {
+      "id": 6694504496,
+      "name": "lark create问题单",
+      "pattern": "State",
+      "deleted_by": "",
+      "simple_name": "zhuliucheng",
+      "work_item_type_key": "670f3cdaddd89a6fa8f18e65",
+      "project_key": "66bb463229e5e58856b4ed19",
+      "template_type": "",
+      "sub_stage": "started",
+      "created_at": 1768405417889,
       "fields": [
         {
           "field_key": "template",
@@ -15,11 +133,32 @@
           "help_description": ""
         },
         {
+          "field_key": "role_owners",
+          "field_value": null,
+          "field_type_key": "role_owners",
+          "field_alias": "",
+          "help_description": ""
+        },
+        {
+          "field_value": false,
+          "field_type_key": "bool",
+          "field_alias": "is_frozen",
           "help_description": "",
-          "field_key": "owner",
-          "field_value": "7387857889332969475",
-          "field_type_key": "user",
-          "field_alias": "owner"
+          "field_key": "is_frozen"
+        },
+        {
+          "field_key": "current_status_operator",
+          "field_value": null,
+          "field_type_key": "multi_user",
+          "field_alias": "current_status_operator",
+          "help_description": ""
+        },
+        {
+          "field_key": "start_time",
+          "field_value": 1768405417635,
+          "field_type_key": "date",
+          "field_alias": "start_time",
+          "help_description": ""
         },
         {
           "field_value": {
@@ -32,38 +171,269 @@
           "field_key": "aborted"
         },
         {
-          "field_key": "description",
-          "field_value": "这是一个由集成测试自动创建的工作项，测试完成后会自动删除。",
-          "field_type_key": "multi_text",
+          "field_key": "archiving_status",
+          "field_value": false,
+          "field_type_key": "bool",
+          "field_alias": "archiving_status",
+          "help_description": ""
+        },
+        {
           "field_alias": "description",
+          "help_description": "",
+          "field_key": "description",
+          "field_value": "问题测试",
+          "field_type_key": "multi_text"
+        },
+        {
+          "field_key": "auto_number",
+          "field_value": 36,
+          "field_type_key": "number",
+          "field_alias": "auto_number",
           "help_description": ""
         },
         {
           "field_alias": "",
           "help_description": "",
-          "field_key": "role_owners",
+          "field_key": "field_edd79a",
           "field_value": null,
-          "field_type_key": "role_owners"
+          "field_type_key": "work_item_related_select"
         },
         {
-          "field_alias": "current_status_operator",
-          "help_description": "",
+          "field_key": "owner",
+          "field_value": "7387857889332969475",
+          "field_type_key": "user",
+          "field_alias": "owner",
+          "help_description": ""
+        }
+      ],
+      "work_item_status": {
+        "is_archived_state": false,
+        "is_init_state": true,
+        "updated_at": 1768405417635,
+        "updated_by": "7387857889332969475",
+        "state_key": "started"
+      },
+      "created_by": "7387857889332969475",
+      "updated_at": 1768405417635,
+      "deleted_at": 0,
+      "template_id": 1961905,
+      "current_nodes": [],
+      "updated_by": "7387857889332969475"
+    },
+    {
+      "pattern": "State",
+      "current_nodes": [],
+      "deleted_by": "",
+      "name": "plugin test",
+      "project_key": "66bb463229e5e58856b4ed19",
+      "template_type": "",
+      "updated_by": "7387857889332969475",
+      "created_at": 1768150651123,
+      "simple_name": "zhuliucheng",
+      "template_id": 1961905,
+      "id": 6678001484,
+      "work_item_type_key": "670f3cdaddd89a6fa8f18e65",
+      "deleted_at": 0,
+      "updated_at": 1768150650906,
+      "work_item_status": {
+        "state_key": "started",
+        "is_archived_state": false,
+        "is_init_state": true,
+        "updated_at": 1768150650906,
+        "updated_by": "7387857889332969475"
+      },
+      "fields": [
+        {
+          "field_key": "template",
+          "field_value": {
+            "version": 5,
+            "id": 1961905
+          },
+          "field_type_key": "work_item_template",
+          "field_alias": "template",
+          "help_description": ""
+        },
+        {
           "field_key": "current_status_operator",
-          "field_value": null,
-          "field_type_key": "multi_user"
+          "field_value": [
+            "7387857889332969475"
+          ],
+          "field_type_key": "multi_user",
+          "field_alias": "current_status_operator",
+          "help_description": ""
         },
         {
-          "field_value": false,
-          "field_type_key": "bool",
-          "field_alias": "is_frozen",
           "help_description": "",
-          "field_key": "is_frozen"
+          "field_key": "owner",
+          "field_value": "7387857889332969475",
+          "field_type_key": "user",
+          "field_alias": "owner"
+        },
+        {
+          "field_key": "aborted",
+          "field_value": {
+            "reason": "",
+            "is_aborted": false
+          },
+          "field_type_key": "aborted",
+          "field_alias": "",
+          "help_description": ""
+        },
+        {
+          "field_value": "",
+          "field_type_key": "multi_text",
+          "field_alias": "description",
+          "help_description": "",
+          "field_key": "description"
         },
         {
           "field_key": "start_time",
-          "field_value": 1768371718915,
+          "field_value": 1768150650906,
           "field_type_key": "date",
           "field_alias": "start_time",
+          "help_description": ""
+        },
+        {
+          "field_value": null,
+          "field_type_key": "work_item_related_select",
+          "field_alias": "",
+          "help_description": "",
+          "field_key": "field_edd79a"
+        },
+        {
+          "field_key": "auto_number",
+          "field_value": 9,
+          "field_type_key": "number",
+          "field_alias": "auto_number",
+          "help_description": ""
+        },
+        {
+          "field_key": "role_owners",
+          "field_value": [
+            {
+              "role": "role_cc5cef",
+              "owners": [
+                "7387857889332969475"
+              ]
+            },
+            {
+              "role": "role_a06e00",
+              "owners": [
+                "7387857889332969475"
+              ]
+            }
+          ],
+          "field_type_key": "role_owners",
+          "field_alias": "",
+          "help_description": ""
+        },
+        {
+          "field_key": "archiving_status",
+          "field_value": false,
+          "field_type_key": "bool",
+          "field_alias": "archiving_status",
+          "help_description": ""
+        },
+        {
+          "field_type_key": "bool",
+          "field_alias": "is_frozen",
+          "help_description": "",
+          "field_key": "is_frozen",
+          "field_value": false
+        }
+      ],
+      "sub_stage": "started",
+      "created_by": "7387857889332969475"
+    },
+    {
+      "deleted_by": "",
+      "id": 6195756579,
+      "work_item_type_key": "670f3cdaddd89a6fa8f18e65",
+      "current_nodes": [],
+      "created_at": 1752637632984,
+      "project_key": "66bb463229e5e58856b4ed19",
+      "template_type": "",
+      "sub_stage": "started",
+      "work_item_status": {
+        "state_key": "started",
+        "is_archived_state": false,
+        "is_init_state": true,
+        "updated_at": 1752637632776,
+        "updated_by": "7387857889332969475"
+      },
+      "deleted_at": 0,
+      "simple_name": "zhuliucheng",
+      "template_id": 1961905,
+      "name": "gitlab test ",
+      "created_by": "7387857889332969475",
+      "updated_at": 1768142774614,
+      "fields": [
+        {
+          "field_key": "template",
+          "field_value": {
+            "id": 1961905,
+            "version": 5
+          },
+          "field_type_key": "work_item_template",
+          "field_alias": "template",
+          "help_description": ""
+        },
+        {
+          "field_key": "aborted",
+          "field_value": {
+            "reason": "",
+            "is_aborted": false
+          },
+          "field_type_key": "aborted",
+          "field_alias": "",
+          "help_description": ""
+        },
+        {
+          "field_type_key": "role_owners",
+          "field_alias": "",
+          "help_description": "",
+          "field_key": "role_owners",
+          "field_value": [
+            {
+              "role": "role_cc5cef",
+              "owners": [
+                "7387857889332969475"
+              ]
+            },
+            {
+              "role": "role_a06e00",
+              "owners": [
+                "7387857889332969475"
+              ]
+            }
+          ]
+        },
+        {
+          "field_type_key": "multi_text",
+          "field_alias": "description",
+          "help_description": "",
+          "field_key": "description",
+          "field_value": "test modify by plugin1"
+        },
+        {
+          "field_type_key": "number",
+          "field_alias": "auto_number",
+          "help_description": "",
+          "field_key": "auto_number",
+          "field_value": 8
+        },
+        {
+          "field_key": "start_time",
+          "field_value": 1752637632776,
+          "field_type_key": "date",
+          "field_alias": "start_time",
+          "help_description": ""
+        },
+        {
+          "field_key": "owner",
+          "field_value": "7387857889332969475",
+          "field_type_key": "user",
+          "field_alias": "owner",
           "help_description": ""
         },
         {
@@ -74,222 +444,11 @@
           "field_type_key": "bool"
         },
         {
-          "field_value": null,
-          "field_type_key": "work_item_related_select",
-          "field_alias": "",
-          "help_description": "",
-          "field_key": "field_edd79a"
-        },
-        {
-          "field_alias": "auto_number",
-          "help_description": "",
-          "field_key": "auto_number",
-          "field_value": 24,
-          "field_type_key": "number"
-        }
-      ],
-      "work_item_type_key": "670f3cdaddd89a6fa8f18e65",
-      "project_key": "66bb463229e5e58856b4ed19",
-      "template_type": "",
-      "deleted_by": "",
-      "template_id": 1961905,
-      "id": 6689634331,
-      "name": "[E2E Test] 已更新的工作项",
-      "created_by": "7387857889332969475",
-      "deleted_at": 0,
-      "simple_name": "zhuliucheng",
-      "pattern": "State",
-      "updated_by": "7387857889332969475",
-      "created_at": 1768371719213,
-      "updated_at": 1768371720418,
-      "work_item_status": {
-        "state_key": "started",
-        "is_archived_state": false,
-        "is_init_state": true,
-        "updated_at": 1768371718915,
-        "updated_by": "7387857889332969475"
-      }
-    },
-    {
-      "work_item_status": {
-        "is_init_state": true,
-        "updated_at": 1768150650906,
-        "updated_by": "7387857889332969475",
-        "state_key": "started",
-        "is_archived_state": false
-      },
-      "work_item_type_key": "670f3cdaddd89a6fa8f18e65",
-      "pattern": "State",
-      "current_nodes": [],
-      "updated_by": "7387857889332969475",
-      "updated_at": 1768150650906,
-      "project_key": "66bb463229e5e58856b4ed19",
-      "simple_name": "zhuliucheng",
-      "id": 6678001484,
-      "template_type": "",
-      "sub_stage": "started",
-      "deleted_at": 0,
-      "template_id": 1961905,
-      "name": "plugin test",
-      "created_by": "7387857889332969475",
-      "created_at": 1768150651123,
-      "fields": [
-        {
-          "field_key": "template",
-          "field_value": {
-            "id": 1961905,
-            "version": 5
-          },
-          "field_type_key": "work_item_template",
-          "field_alias": "template",
-          "help_description": ""
-        },
-        {
-          "field_key": "description",
-          "field_value": "",
-          "field_type_key": "multi_text",
-          "field_alias": "description",
-          "help_description": ""
-        },
-        {
-          "field_key": "auto_number",
-          "field_value": 9,
-          "field_type_key": "number",
-          "field_alias": "auto_number",
-          "help_description": ""
-        },
-        {
-          "help_description": "",
-          "field_key": "owner",
-          "field_value": "7387857889332969475",
-          "field_type_key": "user",
-          "field_alias": "owner"
-        },
-        {
-          "field_key": "archiving_status",
-          "field_value": false,
-          "field_type_key": "bool",
-          "field_alias": "archiving_status",
-          "help_description": ""
-        },
-        {
-          "field_key": "aborted",
-          "field_value": {
-            "reason": "",
-            "is_aborted": false
-          },
-          "field_type_key": "aborted",
-          "field_alias": "",
-          "help_description": ""
-        },
-        {
-          "field_key": "start_time",
-          "field_value": 1768150650906,
-          "field_type_key": "date",
-          "field_alias": "start_time",
-          "help_description": ""
-        },
-        {
-          "field_value": [
-            {
-              "role": "role_cc5cef",
-              "owners": [
-                "7387857889332969475"
-              ]
-            },
-            {
-              "role": "role_a06e00",
-              "owners": [
-                "7387857889332969475"
-              ]
-            }
-          ],
-          "field_type_key": "role_owners",
-          "field_alias": "",
-          "help_description": "",
-          "field_key": "role_owners"
-        },
-        {
-          "field_key": "field_edd79a",
-          "field_value": null,
-          "field_type_key": "work_item_related_select",
-          "field_alias": "",
-          "help_description": ""
-        },
-        {
-          "field_key": "current_status_operator",
-          "field_value": [
-            "7387857889332969475"
-          ],
-          "field_type_key": "multi_user",
-          "field_alias": "current_status_operator",
-          "help_description": ""
-        },
-        {
           "help_description": "",
           "field_key": "is_frozen",
           "field_value": false,
           "field_type_key": "bool",
           "field_alias": "is_frozen"
-        }
-      ],
-      "deleted_by": ""
-    },
-    {
-      "work_item_type_key": "670f3cdaddd89a6fa8f18e65",
-      "created_by": "7387857889332969475",
-      "simple_name": "zhuliucheng",
-      "project_key": "66bb463229e5e58856b4ed19",
-      "pattern": "State",
-      "sub_stage": "started",
-      "deleted_at": 0,
-      "template_id": 1961905,
-      "deleted_by": "",
-      "id": 6195756579,
-      "template_type": "",
-      "current_nodes": [],
-      "updated_by": "7387857889332969475",
-      "updated_at": 1768142774614,
-      "work_item_status": {
-        "is_archived_state": false,
-        "is_init_state": true,
-        "updated_at": 1752637632776,
-        "updated_by": "7387857889332969475",
-        "state_key": "started"
-      },
-      "name": "gitlab test ",
-      "created_at": 1752637632984,
-      "fields": [
-        {
-          "field_key": "template",
-          "field_value": {
-            "id": 1961905,
-            "version": 5
-          },
-          "field_type_key": "work_item_template",
-          "field_alias": "template",
-          "help_description": ""
-        },
-        {
-          "field_key": "auto_number",
-          "field_value": 8,
-          "field_type_key": "number",
-          "field_alias": "auto_number",
-          "help_description": ""
-        },
-        {
-          "field_key": "is_frozen",
-          "field_value": false,
-          "field_type_key": "bool",
-          "field_alias": "is_frozen",
-          "help_description": ""
-        },
-        {
-          "field_key": "start_time",
-          "field_value": 1752637632776,
-          "field_type_key": "date",
-          "field_alias": "start_time",
-          "help_description": ""
         },
         {
           "field_value": null,
@@ -297,57 +456,6 @@
           "field_alias": "",
           "help_description": "",
           "field_key": "field_edd79a"
-        },
-        {
-          "field_key": "description",
-          "field_value": "test modify by plugin1",
-          "field_type_key": "multi_text",
-          "field_alias": "description",
-          "help_description": ""
-        },
-        {
-          "help_description": "",
-          "field_key": "owner",
-          "field_value": "7387857889332969475",
-          "field_type_key": "user",
-          "field_alias": "owner"
-        },
-        {
-          "help_description": "",
-          "field_key": "role_owners",
-          "field_value": [
-            {
-              "role": "role_cc5cef",
-              "owners": [
-                "7387857889332969475"
-              ]
-            },
-            {
-              "role": "role_a06e00",
-              "owners": [
-                "7387857889332969475"
-              ]
-            }
-          ],
-          "field_type_key": "role_owners",
-          "field_alias": ""
-        },
-        {
-          "help_description": "",
-          "field_key": "archiving_status",
-          "field_value": false,
-          "field_type_key": "bool",
-          "field_alias": "archiving_status"
-        },
-        {
-          "field_key": "aborted",
-          "field_value": {
-            "reason": "",
-            "is_aborted": false
-          },
-          "field_type_key": "aborted",
-          "field_alias": "",
-          "help_description": ""
         },
         {
           "field_key": "current_status_operator",
@@ -358,10 +466,12 @@
           "field_alias": "current_status_operator",
           "help_description": ""
         }
-      ]
+      ],
+      "pattern": "State",
+      "updated_by": "7387857889332969475"
     }
   ],
-  "total": 3,
+  "total": 4,
   "page_num": 1,
   "page_size": 10
 }
