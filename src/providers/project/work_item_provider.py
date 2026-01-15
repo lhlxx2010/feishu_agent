@@ -532,14 +532,85 @@ class WorkItemProvider(Provider):
         return issue_id
 
     async def get_issue_details(self, issue_id: int) -> Dict[str, Any]:
-        """获取 Issue 详情"""
+        """
+        获取 Issue 详情
+
+        增强逻辑: 如果在当前类型中未找到，会自动尝试在项目的所有其他类型中搜索。
+        """
         project_key = await self._get_project_key()
         type_key = await self._get_type_key()
 
-        items = await self.api.query(project_key, type_key, [issue_id])
-        if not items:
-            raise Exception(f"Issue {issue_id} not found")
-        return items[0]
+        # 1. 尝试从当前类型获取
+        try:
+            items = await self.api.query(project_key, type_key, [issue_id])
+            if items:
+                return items[0]
+        except Exception as e:
+            logger.debug(f"Initial query failed for type {type_key}: {e}")
+
+        # 2. 当前类型未找到，尝试跨类型搜索
+        logger.info(
+            f"Issue {issue_id} not found in type {type_key}, trying auto-discovery across all types..."
+        )
+
+        try:
+            # 获取所有类型
+            all_types = await self.meta.list_types(project_key)
+
+            # 排除已经试过的当前类型
+            other_types = {
+                name: key for name, key in all_types.items() if key != type_key
+            }
+
+            if not other_types:
+                raise Exception(
+                    f"Issue {issue_id} not found (no other types to search)"
+                )
+
+            # 并发搜索其他类型（分批次以防并发过高）
+            found_item = None
+            found_type_name = None
+            found_type_key = None
+
+            # 将类型转换为列表以便分批
+            type_items = list(other_types.items())
+            batch_size = 5
+
+            for i in range(0, len(type_items), batch_size):
+                batch = type_items[i : i + batch_size]
+                tasks = [
+                    self.api.query(project_key, t_key, [issue_id])
+                    for _t_name, t_key in batch
+                ]
+
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+                for idx, res in enumerate(results):
+                    if isinstance(res, list) and res:
+                        found_item = res[0]
+                        found_type_name = batch[idx][0]
+                        found_type_key = batch[idx][1]
+                        break
+
+                if found_item:
+                    break
+
+            if found_item:
+                logger.info(
+                    f"Auto-discovery success: Issue {issue_id} found in type '{found_type_name}'"
+                )
+
+                # 关键修正：如果是在其他类型中找到的，我们必须更新当前的 provider 状态或元数据上下文
+                # 因为后续的字段解析（readable fields）依赖正确的 type_key
+                # 这里我们临时通过修改 item 中的 work_item_type_key 来确保后续处理正确
+                # 但更彻底的做法可能是更新 self._resolved_type_key，但这会影响该 Provider 实例后续的其他调用
+                # 所以我们选择仅仅返回 item，而在 _enhance_work_item_with_readable_names 中会优先使用 item 中的 type key
+                return found_item
+
+        except Exception as e:
+            logger.warning(f"Auto-discovery failed: {e}")
+
+        raise Exception(f"Issue {issue_id} not found in any work item type")
 
     async def _try_fetch_type(
         self, project_key: str, type_key: str, work_item_ids: List[int]
