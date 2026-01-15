@@ -3,16 +3,13 @@
 测试provider.get_tasks方法
 """
 
-import asyncio
 import json
-import sys
-import os
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pytest
 
 from src.providers.project.work_item_provider import WorkItemProvider
 
 
+@pytest.mark.asyncio
 async def test_provider_tasks():
     """测试provider.get_tasks方法"""
     provider = WorkItemProvider(work_item_type_name="Issue管理")
@@ -63,7 +60,11 @@ async def test_provider_tasks():
                         }
                     )
 
-                    search_group = {"conjunction": "AND", "conditions": conditions}
+                    search_group = {
+                        "conjunction": "AND",
+                        "search_params": conditions,
+                        "search_groups": [],
+                    }
 
                     raw_api_result = await provider.api.search_params(
                         project_key=project_key,
@@ -124,17 +125,9 @@ async def test_provider_tasks():
         ],
     }
 
-    simplified = provider.simplify_work_item(test_raw_item)
+    simplified = await provider.simplify_work_item(test_raw_item)
     print(f"简化结果: {simplified}")
 
     # 测试提取
     priority = provider._extract_field_value(test_raw_item, "priority")
     print(f"提取的优先级: {priority}")
-
-
-async def main():
-    await test_provider_tasks()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

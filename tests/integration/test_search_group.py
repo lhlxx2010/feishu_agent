@@ -3,15 +3,12 @@
 测试search_group结构
 """
 
-import asyncio
-import sys
-import os
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pytest
 
 from src.providers.project.work_item_provider import WorkItemProvider
 
 
+@pytest.mark.asyncio
 async def test_search_group_structure():
     """测试search_group结构"""
     provider = WorkItemProvider(work_item_type_name="Issue管理")
@@ -89,11 +86,3 @@ async def test_search_group_structure():
         import traceback
 
         traceback.print_exc()
-
-
-async def main():
-    await test_search_group_structure()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

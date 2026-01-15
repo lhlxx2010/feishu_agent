@@ -3,15 +3,12 @@
 测试字段提取
 """
 
-import asyncio
-import sys
-import os
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pytest
 
 from src.providers.project.work_item_provider import WorkItemProvider
 
 
+@pytest.mark.asyncio
 async def test_field_extraction():
     """测试字段提取"""
     provider = WorkItemProvider(work_item_type_name="Issue管理")
@@ -116,11 +113,3 @@ async def test_field_extraction():
         import traceback
 
         traceback.print_exc()
-
-
-async def main():
-    await test_field_extraction()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

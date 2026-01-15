@@ -3,12 +3,8 @@
 测试优先级字段提取问题
 """
 
-import asyncio
 import logging
-import sys
-import os
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pytest
 
 from src.core.config import settings
 from src.providers.project.work_item_provider import WorkItemProvider
@@ -17,6 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.asyncio
 async def test_priority_extraction():
     """测试优先级字段提取"""
     print("=== 测试优先级字段提取 ===")
@@ -94,6 +91,7 @@ async def test_priority_extraction():
     print(f"测试提取优先级(旧格式): {priority_value2} (期望: 'P1')")
 
 
+@pytest.mark.asyncio
 async def test_search_params_structure():
     """测试search_params API调用结构"""
     print("\n=== 测试search_params API结构 ===")
@@ -159,12 +157,3 @@ async def test_search_params_structure():
         import traceback
 
         traceback.print_exc()
-
-
-async def main():
-    await test_priority_extraction()
-    await test_search_params_structure()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

@@ -3,17 +3,14 @@
 测试API响应格式
 """
 
-import asyncio
 import json
-import sys
-import os
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pytest
 
 from src.providers.project.work_item_provider import WorkItemProvider
 from src.core.project_client import get_project_client
 
 
+@pytest.mark.asyncio
 async def test_api_response():
     """测试API响应格式"""
     provider = WorkItemProvider(work_item_type_name="Issue管理")
@@ -39,7 +36,11 @@ async def test_api_response():
 
     conditions.append({"field_key": field_key, "operator": "IN", "value": [option_val]})
 
-    search_group = {"conjunction": "AND", "conditions": conditions}
+    search_group = {
+        "conjunction": "AND",
+        "search_params": conditions,
+        "search_groups": [],
+    }
 
     print(f"\n搜索条件: {search_group}")
 
@@ -144,11 +145,3 @@ async def test_api_response():
         import traceback
 
         traceback.print_exc()
-
-
-async def main():
-    await test_api_response()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
