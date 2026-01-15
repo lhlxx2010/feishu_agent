@@ -31,7 +31,8 @@ async def test_project_auth_injects_plugin_token(respx_mock, monkeypatch):
 @pytest.mark.asyncio
 async def test_project_auth_injects_user_key(respx_mock, monkeypatch):
     """Test that ProjectAuth injects X-USER-KEY header."""
-    monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_TOKEN", None)
+    # 设置静态 token 以避免触发 API 调用
+    monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_TOKEN", "test_token")
     monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_KEY", "test_user_key")
 
     auth = ProjectAuth()
@@ -72,7 +73,9 @@ async def test_project_auth_injects_both_headers(respx_mock, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_project_auth_no_token_from_auth_manager(respx_mock, monkeypatch):
-    """Test that ProjectAuth handles case when token fetch returns None."""
+    """Test that ProjectAuth raises TokenError when no token is available."""
+    from src.core.project_client import TokenError
+
     monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_TOKEN", None)
     monkeypatch.setattr(settings, "FEISHU_PROJECT_USER_KEY", None)
     monkeypatch.setattr(settings, "FEISHU_PROJECT_PLUGIN_ID", None)
@@ -82,15 +85,12 @@ async def test_project_auth_no_token_from_auth_manager(respx_mock, monkeypatch):
     request = Request("GET", "https://test.api/endpoint")
 
     auth_flow = auth.async_auth_flow(request)
-    try:
-        result = await auth_flow.__anext__()
-    except StopAsyncIteration:
-        result = None
 
-    # Should still yield the request even without token
-    assert result is not None
-    assert "X-PLUGIN-TOKEN" not in result.headers
-    assert "X-USER-KEY" not in result.headers
+    # Should raise TokenError when no token is available
+    with pytest.raises(TokenError) as exc_info:
+        await auth_flow.__anext__()
+
+    assert "Failed to retrieve plugin token" in str(exc_info.value)
 
 
 @pytest.mark.asyncio

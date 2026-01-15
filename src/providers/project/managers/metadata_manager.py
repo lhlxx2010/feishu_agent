@@ -28,7 +28,7 @@ MetadataManager - 级联缓存管理器
 
 import asyncio
 import logging
-from typing import Dict, Optional, Any
+from typing import Dict, List, Optional, Any
 
 from src.providers.project.api import ProjectAPI, MetadataAPI, FieldAPI, UserAPI
 
@@ -738,6 +738,92 @@ class MetadataManager:
                 return user_key
 
             raise Exception(f"用户 '{identifier}' 未找到有效的 user_key")
+
+    async def get_user_name(self, user_key: str) -> Optional[str]:
+        """
+        根据 User Key 获取用户名称（反向查找）
+
+        Args:
+            user_key: 用户 Key（如 "7446873861590728705"）
+
+        Returns:
+            用户名称（中文名优先），未找到时返回 None
+        """
+        if not user_key:
+            return None
+
+        # 检查反向缓存
+        # 遍历 _user_cache 查找是否已有该 user_key 的名称
+        for name, cached_key in self._user_cache.items():
+            if cached_key == user_key:
+                logger.debug(
+                    f"Cache hit (reverse): user_key='{user_key}' -> name='{name}'"
+                )
+                return name
+
+        # 调用 API 查询用户详情
+        try:
+            users = await self.user_api.query_users(user_keys=[user_key])
+            if users:
+                user = users[0]
+                name = user.get("name_cn") or user.get("name_en") or user.get("name")
+                if name:
+                    # 缓存正向和反向映射
+                    self._user_cache[name] = user_key
+                    logger.debug(
+                        f"Cache set (reverse): user_key='{user_key}' -> name='{name}'"
+                    )
+                    return name
+        except Exception as e:
+            logger.warning(f"Failed to get user name for key '{user_key}': {e}")
+
+        return None
+
+    async def batch_get_user_names(self, user_keys: List[str]) -> Dict[str, str]:
+        """
+        批量获取用户名称
+
+        Args:
+            user_keys: 用户 Key 列表
+
+        Returns:
+            {user_key: user_name} 字典，未找到的 key 不包含在结果中
+        """
+        result = {}
+        keys_to_query = []
+
+        # 先检查缓存
+        for key in user_keys:
+            if not key:
+                continue
+            found = False
+            for name, cached_key in self._user_cache.items():
+                if cached_key == key:
+                    result[key] = name
+                    found = True
+                    break
+            if not found:
+                keys_to_query.append(key)
+
+        # 批量查询未缓存的
+        if keys_to_query:
+            try:
+                users = await self.user_api.query_users(user_keys=keys_to_query)
+                for user in users:
+                    key = user.get("user_key")
+                    name = (
+                        user.get("name_cn") or user.get("name_en") or user.get("name")
+                    )
+                    if key and name:
+                        result[key] = name
+                        self._user_cache[name] = key
+                        logger.debug(
+                            f"Cache set (batch): user_key='{key}' -> name='{name}'"
+                        )
+            except Exception as e:
+                logger.warning(f"Failed to batch get user names: {e}")
+
+        return result
 
     # ========== 高级方法: 级联解析 ==========
 

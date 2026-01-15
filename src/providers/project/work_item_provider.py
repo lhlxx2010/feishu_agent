@@ -288,9 +288,10 @@ class WorkItemProvider(Provider):
 
         Args:
             items: 原始工作项列表
+            field_mapping: 字段名称到字段Key的映射（可选）
 
         Returns:
-            简化后的工作项列表
+            简化后的工作项列表，owner 字段会转换为人名以提高可读性
         """
         logger.info("simplify_work_items: processing %d items", len(items))
         if items:
@@ -304,7 +305,33 @@ class WorkItemProvider(Provider):
                 )
         # 并行简化所有工作项
         tasks = [self.simplify_work_item(item, field_mapping) for item in items]
-        return await asyncio.gather(*tasks)
+        simplified_items = await asyncio.gather(*tasks)
+
+        # 批量转换 owner user_key 为人名
+        owner_keys = []
+        for item in simplified_items:
+            owner = item.get("owner")
+            if owner and isinstance(owner, str):
+                # 检查是否是 user_key 格式（长数字字符串）
+                if owner.isdigit() and len(owner) > 10:
+                    owner_keys.append(owner)
+
+        if owner_keys:
+            # 去重
+            unique_keys = list(set(owner_keys))
+            logger.info("Converting %d unique owner keys to names", len(unique_keys))
+            try:
+                key_to_name = await self.meta.batch_get_user_names(unique_keys)
+                # 替换 owner 字段
+                for item in simplified_items:
+                    owner = item.get("owner")
+                    if owner and owner in key_to_name:
+                        item["owner"] = key_to_name[owner]
+            except Exception as e:
+                logger.warning("Failed to convert owner keys to names: %s", e)
+                # 失败时保持原样，不影响正常返回
+
+        return simplified_items
 
     async def resolve_related_to(
         self, related_to: Union[int, str], project: Optional[str] = None
